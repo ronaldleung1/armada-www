@@ -7,7 +7,7 @@ export default function Home() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <div className="flex flex-col items-center">
           <Image
-            src="/ship.png"
+            src="https://github.com/ronaldleung1/armada-www/blob/main/public/ship.png?raw=true"
             alt="Armada Logo"
             width={180}
             height={38}
