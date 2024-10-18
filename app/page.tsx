@@ -57,7 +57,8 @@ export default function Home() {
             </a>,{' '}
             <a
               className="underline underline-offset-4"
-              href="https://oasis-of-ideas.com/"
+              href="https://oasis-of-ideas.com/?utm_source=armadawebsite
+"
               target="_blank"
               rel="noopener noreferrer"
             >
