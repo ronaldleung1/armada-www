@@ -3,21 +3,30 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #FFF5E4;
+  --foreground: #1a1918;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background-color: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/noise.png');
+  background-repeat: repeat;
+  background-size: auto;
+  opacity: 0.5;
+  z-index: -1;
+  pointer-events: none;
 }
 
 @layer utilities {
@@ -25,3 +34,4 @@ body {
     text-wrap: balance;
   }
 }
+
