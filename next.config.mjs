@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['github.com'],
-  },
   /**
    * Enable static exports for the App Router.
    *
@@ -15,7 +12,7 @@ const nextConfig = {
    *
    * @see https://nextjs.org/docs/app/api-reference/next-config-js/basePath
    */
-  basePath: "/nextjs-github-pages",
+  // basePath: "/armada-www",
 
   /**
    * Disable server-based image optimization. Next.js does not support
@@ -24,6 +21,7 @@ const nextConfig = {
    * @see https://nextjs.org/docs/app/api-reference/components/image#unoptimized
    */
   images: {
+    domains: ['github.com'],
     unoptimized: true,
   },
 };

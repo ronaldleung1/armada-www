@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="stylesheet" href="https://cdn.locadapt.com/locadapt.min.css" />
+        {/* <link rel="stylesheet" href="https://cdn.locadapt.com/locadapt.min.css" />
         <script
           src="https://cdn.locadapt.com/locadapt.min.js"
           data-project-id="1a03ddbb-04b2-48c7-96dc-1106d9963dca"
@@ -36,18 +36,16 @@ export default function RootLayout({
           data-link-prevent-default
           data-start-hidden
           defer
-        ></script>
+        ></script> */}
       </head>
       <body
         className={`${instrumentSans.variable} ${instrumentSerif.variable} antialiased`}
       >
-        <div id="locadapt-optional-loading-indicator">
-          {/* Add your loading indicator here if using `data-start-hidden` */}
-        </div>
+        {/* <div id="locadapt-optional-loading-indicator"></div> */}
         {/* Must set `custom-base-content` to `display: none`, and use this ID, if set `data-start-hidden` */}
-        <div id="custom-base-content" style={{ display: 'none' }}>
+        {/* <div id="custom-base-content" style={{ display: 'none' }}> */}
           {children}
-        </div>
+        {/* </div> */}
       </body>
     </html>
   );
