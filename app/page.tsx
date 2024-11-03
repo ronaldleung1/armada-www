@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+import { FaBell, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 // import GameOfLife from "@/components/GameOfLife";
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
               <li>Create a consistent time + space for people to build</li>
               <li>Form a tight-knit community with resources and support</li>
               <li>Implement unique accountability strategies to incentivize shipping</li>
-              <li>Recruit freshmen and sophomores by tapping for individuals that have a demonstrated interest in building things/breaking rules (e.g. someone with several side projects on GitHub rather than someone that just talks about “building things”)</li>
+              {/* <li>Recruit freshmen and sophomores by tapping for individuals that have a demonstrated interest in building things/breaking rules (e.g. someone with several side projects on GitHub rather than someone that just talks about “building things”)</li> */}
             </ul>
           </div>
 
@@ -82,7 +82,7 @@ export default function Home() {
                 rel="noopener noreferrer"
               >
                 Samaritan Scout
-              </a>, and{' '}
+              </a>, {' '}
               <a
                 className="underline underline-offset-4"
                 href="https://chromewebstore.google.com/detail/whats-that-course/amnpkieecicdklmhdjjhfhjflkfphmag"
@@ -90,9 +90,19 @@ export default function Home() {
                 rel="noopener noreferrer"
               >
                 What’s that Course?
-              </a>.
+              </a> and more.
             </p>
           </div>
+
+          <a
+            className="flex flex-row gap-2 rounded-full items-center bg-black px-4 py-2 text-white hover:bg-black/75 transition mt-4"
+            href="https://lu.ma/armada"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaBell size={16}/>
+            Subscribe to new events
+          </a>
         </main>
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm opacity-80">
           <a
@@ -102,7 +112,7 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <FaXTwitter size={16} aria-hidden />
-            Twitter/X
+            X/Twitter
           </a>
           <a
             className="flex items-center gap-2 hover:underline hover:underline-offset-4"

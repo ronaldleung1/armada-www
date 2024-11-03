@@ -16,7 +16,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Armada",
+  title: "Cornell Armada",
   description: "We ship.",
 };
 
