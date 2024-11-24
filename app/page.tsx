@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { FaBell, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+
 // import GameOfLife from "@/components/GameOfLife";
 
 export default function Home() {
@@ -7,7 +8,7 @@ export default function Home() {
     <div className="relative">
       {/* <GameOfLife /> */}
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-instrument-sans)]">
-        <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+        <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start max-w-3xl">
           <div className="flex flex-col items-center">
             <Image
               src="https://github.com/ronaldleung1/armada-www/blob/main/public/ship.png?raw=true"
@@ -16,24 +17,21 @@ export default function Home() {
               height={38}
               priority
             />
-            <h1 className="text-5xl font-[family-name:var(--font-instrument-serif)]">armada</h1>
+            <h1 className="text-5xl font-['Jacquard_12']">ARMADA</h1>
           </div>
           <h2 className="text-2xl font-bold">We are the home for Cornell’s most ambitious builders</h2>
-          <p>We support everyone from poets to programmers. Our goal is to steer a small, high-density collective of builders to ship passion and commercial projects.</p>
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-xl font-semibold">How?</h3>
+            <h3 className="text-xl font-semibold">Some stuff about us:</h3>
             <ul className="list-disc list-inside">
-              <li>Create a consistent time + space for people to build</li>
-              <li>Form a tight-knit community with resources and support</li>
-              <li>Implement unique accountability strategies to incentivize shipping</li>
-              {/* <li>Recruit freshmen and sophomores by tapping for individuals that have a demonstrated interest in building things/breaking rules (e.g. someone with several side projects on GitHub rather than someone that just talks about “building things”)</li> */}
+              <li>We are a community of builders working on passion projects</li>
+              <li>Meet weekly for building sessions</li>
+              <li>Scale exclusively through the network effect</li>
             </ul>
           </div>
-
           <div className="flex flex-col gap-2">
-            <h3 className="text-xl font-semibold">Passion Projects Shipped @ Armada</h3>
             <p>
+              Our projects include{' '}
               <a
                 className="underline underline-offset-4"
                 href="https://bigredbeds.com/"
@@ -52,16 +50,7 @@ export default function Home() {
               </a>,{' '}
               <a
                 className="underline underline-offset-4"
-                href="https://latexify-ai.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Latexify
-              </a>,{' '}
-              <a
-                className="underline underline-offset-4"
-                href="https://oasis-of-ideas.com/?utm_source=armadawebsite
-  "
+                href="https://oasis-of-ideas.com/?utm_source=armadawebsite"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -82,27 +71,76 @@ export default function Home() {
                 rel="noopener noreferrer"
               >
                 Samaritan Scout
-              </a>, {' '}
+              </a>,{' '}
               <a
                 className="underline underline-offset-4"
                 href="https://chromewebstore.google.com/detail/whats-that-course/amnpkieecicdklmhdjjhfhjflkfphmag"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                What’s that Course?
-              </a> and more.
+                What's that Course?
+              </a>,{' '}
+              <a
+                className="underline underline-offset-4"
+                href="https://www.instagram.com/swoleai.app"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                SwoleAI
+              </a>,{' '}
+              <a
+                className="underline underline-offset-4"
+                href="https://auntfloskitchen.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Aunt Flo's Kitchen
+              </a>,{' '}
+              <a
+                className="underline underline-offset-4"
+                href="https://www.theoutdoorwholesaler.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                The Outdoor Wholesaler
+              </a>,{' '}
+              <a
+                className="underline underline-offset-4"
+                href="https://locadapt.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Locadapt
+              </a>,{' '}
+              <a
+                className="underline underline-offset-4"
+                href="https://bloux.co/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                BLOUX
+              </a>, and many others.
             </p>
           </div>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xl font-semibold">Contact:</h3>
+            <ul className="list-disc list-inside">
+              <li>We don't have a 3-stage interview process, if you're interested, reach out or network your way in</li>
+              <li>We're looking for people who are obsessively passionate about making things, working on hard problems, and shipping (not yapping about) projects</li>
+              <li>Feel free to airdrop us LLM API tokens, any book by <a className="underline underline-offset-4" href="https://press.stripe.com/" target="_blank" rel="noopener noreferrer">Stripe Press</a>, or <a className="underline underline-offset-4" href="https://www.seriouseats.com/soft-frosted-sugar-cookies-homemade-lofthouse" target="_blank" rel="noopener noreferrer">Frosted Sugar Cookies</a></li>
+              <li>You can reach out via <a className="underline underline-offset-4" href="https://x.com/cornellarmada" target="_blank" rel="noopener noreferrer">𝕏</a></li>
+            </ul>
+          </div>
 
-          <a
+          {/* <a
             className="flex flex-row gap-2 rounded-full items-center bg-black px-4 py-2 text-white hover:bg-black/75 transition mt-4"
             href="https://lu.ma/armada"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <FaBell size={16}/>
+            <FaBell size={16} />
             Subscribe to new events
-          </a>
+          </a> */}
         </main>
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm opacity-80">
           <a

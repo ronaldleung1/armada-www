@@ -28,6 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Jacquard+12&display=swap" rel="stylesheet" />
         {/* <link rel="stylesheet" href="https://cdn.locadapt.com/locadapt.min.css" />
         <script
           src="https://cdn.locadapt.com/locadapt.min.js"
@@ -44,7 +47,7 @@ export default function RootLayout({
         {/* <div id="locadapt-optional-loading-indicator"></div> */}
         {/* Must set `custom-base-content` to `display: none`, and use this ID, if set `data-start-hidden` */}
         {/* <div id="custom-base-content" style={{ display: 'none' }}> */}
-          {children}
+        {children}
         {/* </div> */}
       </body>
     </html>
