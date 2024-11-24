@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FaBell, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+import {FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 
 // import GameOfLife from "@/components/GameOfLife";
 
