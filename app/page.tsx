@@ -18,6 +18,7 @@ export default function Home() {
               priority
             />
             <h1 className="text-5xl font-['Jacquard_12']">ARMADA</h1>
+            <h3 className="text-xl font-semibold">theoria cum praxi</h3>
           </div>
           <h2 className="text-2xl font-bold">We are the home for Cornell’s most ambitious builders</h2>
 
