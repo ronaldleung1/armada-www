@@ -1,4 +1,4 @@
-import Image from "next/image";
+// import Image from "next/image";
 import { FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 import FloatingShip from "@/components/FloatingShip";
 
@@ -18,7 +18,7 @@ export default function Home() {
             <h1 className="text-5xl font-['Jacquard_12']">ARMADA</h1>
           </div>
           <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold">We are the home for Cornell's most ambitious builders</h2>
+            <h2 className="text-2xl font-bold">We are the home for Cornell's most ambitious builders</h2>
             <h3 className="text-xl font-semibold">Some stuff about us:</h3>
             <ul className="list-disc list-inside">
               <li>We are a community of builders working on passion projects</li>

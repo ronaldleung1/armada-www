@@ -9,12 +9,13 @@ const FloatingShip = () => {
     const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
-        if (!shipRef.current) return;
+        const element = shipRef.current;
+        if (!element) return;
 
         let animation: gsap.core.Tween;
 
         if (isHovered) {
-            animation = gsap.to(shipRef.current, {
+            animation = gsap.to(element, {
                 duration: 12,
                 repeat: -1,
                 ease: "none",
@@ -30,7 +31,7 @@ const FloatingShip = () => {
         return () => {
             if (animation) {
                 animation.kill();
-                gsap.to(shipRef.current, {
+                gsap.to(element, {
                     duration: 0.5,
                     y: 0,
                     rotation: 0
