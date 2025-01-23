@@ -1,28 +1,24 @@
 import Image from "next/image";
-import {FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+import { FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+import FloatingShip from "@/components/FloatingShip";
 
 // import GameOfLife from "@/components/GameOfLife";
 
 export default function Home() {
   return (
     <div className="relative">
+
       {/* <GameOfLife /> */}
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-instrument-sans)]">
         <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start max-w-3xl">
           <div className="flex flex-col items-center">
-            <Image
-              src="https://github.com/ronaldleung1/armada-www/blob/main/public/ship.png?raw=true"
-              alt="Armada Logo"
-              width={180}
-              height={38}
-              priority
-            />
-            <h1 className="text-5xl font-['Jacquard_12']">ARMADA</h1>
-            <h3 className="text-xl font-semibold">theoria cum praxi</h3>
+            <FloatingShip />
           </div>
-          <h2 className="text-2xl font-bold">We are the home for Cornell’s most ambitious builders</h2>
-
+          <div className="mt-[80px]">
+            <h1 className="text-5xl font-['Jacquard_12']">ARMADA</h1>
+          </div>
           <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-bold">We are the home for Cornell's most ambitious builders</h2>
             <h3 className="text-xl font-semibold">Some stuff about us:</h3>
             <ul className="list-disc list-inside">
               <li>We are a community of builders working on passion projects</li>
