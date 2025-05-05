@@ -10,43 +10,47 @@ export default function Home() {
         <div className='relative'>
             {/* <GameOfLife /> */}
             <div className='grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-instrument-sans)]'>
-                <main className='flex flex-col gap-8 row-start-2 items-center sm:items-start max-w-3xl'>
-                    <div className='flex flex-col items-center'>
-                        <FloatingShip />
+                <main className='flex flex-col gap-8 row-start-2 items-center sm:items-start max-w-2xl'>
+                    <div className='flex flex-row items-center justify-between w-full'>
+                        <div className="hidden sm:block">
+                            <FloatingShip />
+                        </div>
+                        <div className='mt-[100px] mr-auto'>
+                            <div className='w-[180px] h-auto'>
+                                <img src="/3x2.png" alt="3x2 Logo" className="w-full h-auto" />
+                            </div>
+                        </div>
                     </div>
-                    <div className='mt-[80px]'>
-                        <h1 className="text-5xl font-['Jacquard_12']">
-                            ARMADA
-                        </h1>
-                    </div>
+                    
 
-                    <div className='flex flex-col items-center w-full mb-4'>
+
+                    {/* <div className='flex flex-col items-center w-full mb-4'>
                         <ActionButton href='/venture-cup'>
                             <div className='flex items-center gap-2'>
                                 <FaShip size={16} />
                                 <span>The Venture Cup — March 8 – 15, 2025</span>
                             </div>
                         </ActionButton>
-                    </div>
+                    </div> */}
 
                     <div className='flex flex-col gap-2'>
-                        <h2 className='text-2xl font-bold'>
-                            We are the home for Cornell's most ambitious
-                            builders
+                        <h2 className='text-2xl font-bold pb-2'>
+                        If it ships from Cornell, it probably started here.
                         </h2>
-                        <h3 className='text-xl font-semibold'>
-                            Some stuff about us:
-                        </h3>
-                        <ul className='list-disc list-inside'>
-                            <li>
-                                We are a community of builders working on
-                                passion projects
-                            </li>
-                            <li>Meet weekly for building sessions</li>
-                            <li>
-                                Scale exclusively through the network effect
-                            </li>
-                        </ul>
+                        <div className='flex flex-col md:flex-row gap-4'>
+                            <h3 className='text-xl font-semibold'>
+                                What we are
+                            </h3>
+                            <ul className='list-disc list-inside'>
+                                <li>
+                                A self-selecting group of people who build.
+                                </li>
+                                <li>We meet weekly. We ship. No schooning.                            </li>
+                                <li>
+                                    Scale exclusively through the network effect
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div className='flex flex-col gap-2'>
                         <p>
@@ -153,63 +157,66 @@ export default function Home() {
                         </p>
                     </div>
                     <div className='flex flex-col gap-2'>
-                        <h3 className='text-xl font-semibold'>Contact:</h3>
-                        <ul className='list-disc list-inside'>
-                            <li>
-                                We don't have a 3-stage interview process, if
-                                you're interested, reach out or network your way
-                                in
-                            </li>
-                            <li>
-                                We're looking for people who are obsessively
-                                passionate about making things, working on hard
-                                problems, and shipping (not yapping about)
-                                projects
-                            </li>
-                            <li>
-                                Feel free to airdrop us LLM API tokens, any book
-                                by{' '}
-                                <a
-                                    className='underline underline-offset-4'
-                                    href='https://press.stripe.com/'
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                >
-                                    Stripe Press
-                                </a>
-                                , or{' '}
-                                <a
-                                    className='underline underline-offset-4'
-                                    href='https://www.seriouseats.com/soft-frosted-sugar-cookies-homemade-lofthouse'
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                >
-                                    Frosted Sugar Cookies
-                                </a>
-                            </li>
-                            <li>
-                                You can reach out via{' '}
-                                <a
-                                    className='underline underline-offset-4'
-                                    href='https://x.com/cornellarmada'
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                >
-                                    𝕏
-                                </a>
-                            </li>
-                        </ul>
+                        <div className='flex flex-col md:flex-row gap-4'>
+                            <h3 className='text-xl font-semibold whitespace-nowrap pr-auto'>
+                                Getting in
+                            </h3>
+                            <ul className='list-disc list-inside'>
+                                <li>
+                                If you need an application to prove you're serious, you're not.
+                                If you're interested, reach out or network your way
+                                    in
+                                </li>
+                                <li>
+                                    We're looking for people who are obsessively
+                                    passionate about making things, working on hard
+                                    problems, and shipping (not yapping about)
+                                    projects
+                                </li>
+                                <li>
+                                    Feel free to airdrop us any book
+                                    by{' '}
+                                    <a
+                                        className='underline underline-offset-4'
+                                        href='https://press.stripe.com/'
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                    >
+                                        Stripe Press
+                                    </a>
+                                    , or{' '}
+                                    <a
+                                        className='underline underline-offset-4'
+                                        href='https://www.seriouseats.com/soft-frosted-sugar-cookies-homemade-lofthouse'
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                    >
+                                        Frosted Sugar Cookies
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    {/* <a
-            className="flex flex-row gap-2 rounded-full items-center bg-black px-4 py-2 text-white hover:bg-black/75 transition mt-4"
-            href="https://lu.ma/armada"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaBell size={16} />
-            Subscribe to new events
-          </a> */}
+                    <p>
+                    All empires die. Started in <a
+                            className='underline underline-offset-4'
+                            href='https://x.com/cornellarmada/status/1751712811011514641'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                        >Jan 2024</a> and will end in June 2027—on our terms, not entropy’s.
+                    </p>
+
+                    {/* <div className='flex flex-row gap-4'>
+                            <h3 className='text-xl font-semibold'>
+                                Past events
+                            </h3>
+                            <h3>
+                                <a href='/venture-cup'>Regatta I</a>
+                            </h3>
+                            
+                        </div> */}
+
                 </main>
                 <footer className='row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm opacity-80'>
                     <a
