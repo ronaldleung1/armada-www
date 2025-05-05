@@ -1,7 +1,6 @@
 // import Image from "next/image";
-import { FaLinkedin, FaXTwitter, FaShip } from 'react-icons/fa6';
+import { FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 import FloatingShip from '@/components/FloatingShip';
-import ActionButton from '@/components/ActionButton';
 
 // import GameOfLife from "@/components/GameOfLife";
 
