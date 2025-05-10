@@ -42,9 +42,9 @@ export default function Home() {
                             </h3>
                             <ul className='list-disc list-inside'>
                                 <li>
-                                A self-selecting group of people who build.
+                                A self-selecting group of people who build
                                 </li>
-                                <li>We meet weekly. We ship. No schooning.                            </li>
+                                <li>We meet weekly & ship                           </li>
                                 <li>
                                     Scale exclusively through the network effect
                                 </li>
@@ -162,14 +162,13 @@ export default function Home() {
                             </h3>
                             <ul className='list-disc list-inside'>
                                 <li>
-                                If you need an application to prove you're serious, you're not.
                                 If you're interested, reach out or network your way
                                     in
                                 </li>
                                 <li>
                                     We're looking for people who are obsessively
                                     passionate about making things, working on hard
-                                    problems, and shipping (not yapping about)
+                                    problems, and shipping
                                     projects
                                 </li>
                                 <li>
@@ -203,7 +202,7 @@ export default function Home() {
                             href='https://x.com/cornellarmada/status/1751712811011514641'
                             target='_blank'
                             rel='noopener noreferrer'
-                        >Jan 2024</a> and will end in June 2027—on our terms, not entropy’s.
+                        >Jan 2024</a> and will end in May 2027—on our terms, not entropy’s.
                     </p>
 
                     {/* <div className='flex flex-row gap-4'>
