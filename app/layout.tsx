@@ -15,6 +15,8 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
 });
 
+
+
 export const metadata: Metadata = {
   title: "Cornell Armada",
   description: "We ship.",
@@ -30,7 +32,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Jacquard+12&display=swap" rel="stylesheet" />
         {/* <link rel="stylesheet" href="https://cdn.locadapt.com/locadapt.min.css" />
         <script
           src="https://cdn.locadapt.com/locadapt.min.js"

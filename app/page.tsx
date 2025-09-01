@@ -33,6 +33,9 @@ export default function Home() {
                     </div> */}
 
                     <div className='flex flex-col gap-2'>
+                        {/* <h2 className='text-5xl pb-2' style={{fontFamily: '"Jacquard 12", monospace'}}>
+                        "Ship, don't sink." —Unknown
+                        </h2> */}
                         <h2 className='text-2xl font-bold pb-2'>
                         If it ships from Cornell, it probably started here.
                         </h2>
@@ -162,14 +165,13 @@ export default function Home() {
                             </h3>
                             <ul className='list-disc list-inside'>
                                 <li>
-                                If you're interested, reach out or network your way
+                                No three rounds of interviews. If you're interested, reach out or network your way
                                     in
                                 </li>
                                 <li>
                                     We're looking for people who are obsessively
-                                    passionate about making things, working on hard
-                                    problems, and shipping
-                                    projects
+                                    passionate about making things and working on hard
+                                    problems. Especially if you actually ship (get stuff into the real world rather than just keeping it in your head).
                                 </li>
                                 <li>
                                     Feel free to airdrop us any book
@@ -196,14 +198,14 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <p>
+                    {/* <p>
                     All empires die. Started in <a
                             className='underline underline-offset-4'
                             href='https://x.com/cornellarmada/status/1751712811011514641'
                             target='_blank'
                             rel='noopener noreferrer'
                         >Jan 2024</a> and will end in May 2027—on our terms, not entropy’s.
-                    </p>
+                    </p> */}
 
                     {/* <div className='flex flex-row gap-4'>
                             <h3 className='text-xl font-semibold'>
