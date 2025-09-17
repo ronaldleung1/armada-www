@@ -45,11 +45,13 @@ export default function Home() {
                             </h3>
                             <ul className='list-disc list-inside'>
                                 <li>
-                                A self-selecting group of people who build
+                                A group of people who build side projects and businesses
                                 </li>
-                                <li>We meet weekly & ship                           </li>
                                 <li>
-                                    Scale exclusively through the network effect
+                                We meet weekly & ship                           
+                                </li>
+                                <li>
+                                Self-select for people who ship rather than yap
                                 </li>
                             </ul>
                         </div>
@@ -68,11 +70,11 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://coldcraft.ai/'
+                                href='https://candytrail.ai/'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                ColdCraft
+                                Candytrail
                             </a>
                             ,{' '}
                             <a
@@ -113,11 +115,11 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://www.instagram.com/swoleai.app'
+                                href='https://spotlight.realty/'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                SwoleAI
+                                Spotlight Realty
                             </a>
                             ,{' '}
                             <a
@@ -131,11 +133,11 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://www.theoutdoorwholesaler.com/'
+                                href='https://verduslabs.com/'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                The Outdoor Wholesaler
+                                Verdus Labs
                             </a>
                             ,{' '}
                             <a
@@ -149,11 +151,47 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://bloux.co/'
+                                href='https://culturevisuals.com/'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                BLOUX
+                                Culture Visuals
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://www.halo.so/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Halo
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://home.prysmapp.com/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Prysm
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://apps.apple.com/us/app/beartrak-for-cornell/id6737151761'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                BearTrak
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://astra-engineering.co/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Astra
                             </a>
                             , and many others.
                         </p>
@@ -161,20 +199,23 @@ export default function Home() {
                     <div className='flex flex-col gap-2'>
                         <div className='flex flex-col md:flex-row gap-4'>
                             <h3 className='text-xl font-semibold whitespace-nowrap pr-auto'>
-                                Getting in
+                                Since forming
                             </h3>
                             <ul className='list-disc list-inside'>
                                 <li>
-                                No three rounds of interviews. If you're interested, reach out or network your way
-                                    in
+                                We've swept hackathons: BigRedHacks, HackMIT, HackTheNorth, Cornell BOOM, etc.
                                 </li>
                                 <li>
-                                    We're looking for people who are obsessively
-                                    passionate about making things and working on hard
-                                    problems. Especially if you actually ship (get stuff into the real world rather than just keeping it in your head).
+                                Had seven dropouts this semester
                                 </li>
                                 <li>
-                                    Feel free to airdrop us any book
+                                Funneled 70% of Cornell YC Summer 2025 admits
+                                </li>
+                                <li>
+                                We don't like people who spend all day recruiting. We don't like people who largely yap and perpetually push off shipping. We love people who are obsessively passionate about making things and working on hard problems.
+                                </li>
+                                <li>
+                                    We accept treats, like books
                                     by{' '}
                                     <a
                                         className='underline underline-offset-4'
