@@ -133,6 +133,15 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
+                                href='https://www.getfilmify.com/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Filmify
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
                                 href='https://verduslabs.com/'
                                 target='_blank'
                                 rel='noopener noreferrer'
