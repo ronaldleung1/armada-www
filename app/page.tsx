@@ -169,15 +169,6 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://www.halo.so/'
-                                target='_blank'
-                                rel='noopener noreferrer'
-                            >
-                                Halo
-                            </a>
-                            ,{' '}
-                            <a
-                                className='underline underline-offset-4'
                                 href='https://home.prysmapp.com/'
                                 target='_blank'
                                 rel='noopener noreferrer'
@@ -259,6 +250,9 @@ export default function Home() {
                     </p> */}
                     <p>
                     "Hurry up and fail" —John W. Gardner, <em>Self-Renewal</em> (1964)
+                    </p>
+                    <p>
+                    Supported by Jared Friedman (<a className='underline underline-offset-4' href='https://www.ycombinator.com/' target='_blank' rel='noopener noreferrer'>Y Combinator</a>), Tony Dang '21 (<a className='underline underline-offset-4' href='https://infisical.com/' target='_blank' rel='noopener noreferrer'>Infisical</a>), and fed by <a className='underline underline-offset-4' href='https://ithacahummus.com/' target='_blank' rel='noopener noreferrer'>Ithaca Hummus</a>.
                     </p>
                     {/* <div className='flex flex-row gap-4'>
                             <h3 className='text-xl font-semibold'>
