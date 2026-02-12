@@ -193,6 +193,33 @@ export default function Home() {
                             >
                                 Astra
                             </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://head.surf/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Head Surf
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://chromewebstore.google.com/detail/mode-ai-fashion-stylist/bbgigkgmodajaobdfalekpaolpolebnm'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                MODE
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://gcalwrapped.com/'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                GCal Wrapped
+                            </a>
                             , and many others.
                         </p>
                     </div>
@@ -252,7 +279,7 @@ export default function Home() {
                     "Hurry up and fail" —John W. Gardner, <em>Self-Renewal</em> (1964)
                     </p>
                     <p>
-                    Supported by Jared Friedman (<a className='underline underline-offset-4' href='https://www.ycombinator.com/' target='_blank' rel='noopener noreferrer'>Y Combinator</a>), Tony Dang '21 (<a className='underline underline-offset-4' href='https://infisical.com/' target='_blank' rel='noopener noreferrer'>Infisical</a>), and fed by <a className='underline underline-offset-4' href='https://ithacahummus.com/' target='_blank' rel='noopener noreferrer'>Ithaca Hummus</a>.
+                    Supported by Jared Friedman (<a className='underline underline-offset-4' href='https://www.ycombinator.com/' target='_blank' rel='noopener noreferrer'>Y Combinator</a>), Tony Dang '21 (<a className='underline underline-offset-4' href='https://infisical.com/' target='_blank' rel='noopener noreferrer'>Infisical</a>), <a className='underline underline-offset-4' href='https://www.anthropic.com/' target='_blank' rel='noopener noreferrer'>Anthropic</a>, and fed by <a className='underline underline-offset-4' href='https://ithacahummus.com/' target='_blank' rel='noopener noreferrer'>Ithaca Hummus</a>.
                     </p>
                     {/* <div className='flex flex-row gap-4'>
                             <h3 className='text-xl font-semibold'>
