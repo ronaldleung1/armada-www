@@ -187,6 +187,15 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
+                                href='https://apps.apple.com/us/app/lingofable/id6759223711'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Lingofable
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
                                 href='https://astra-engineering.co/'
                                 target='_blank'
                                 rel='noopener noreferrer'
