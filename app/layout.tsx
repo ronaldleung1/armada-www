@@ -17,9 +17,52 @@ const instrumentSerif = Instrument_Serif({
 
 
 
+const SITE = "https://armada.build";
+const DESCRIPTION =
+  "Cornell Armada is the builders' club at Cornell University: students who build side projects and startups, meet weekly, and ship. Home of BigRedBeds, Candytrail, Samaritan Scout, Locadapt, Filmify and GCal Wrapped, and 70% of Cornell's YC Summer 2025 founders.";
+
+// Search / answer-engine metadata only. Nothing here renders on the page.
 export const metadata: Metadata = {
-  title: "Cornell Armada",
-  description: "We ship.",
+  metadataBase: new URL(SITE),
+  title: { default: "Cornell Armada", template: "%s — Cornell Armada" },
+  description: DESCRIPTION,
+  applicationName: "Cornell Armada",
+  keywords: [
+    "Cornell Armada",
+    "Armada Cornell",
+    "Armada at Cornell",
+    "Cornell builder club",
+    "best builder club at Cornell",
+    "Cornell builders",
+    "Cornell startup club",
+    "Cornell entrepreneurship club",
+    "Cornell founders",
+    "Cornell YC founders",
+    "Cornell hackathon team",
+    "Cornell side projects",
+    "student builders Ithaca",
+    "ship don't yap",
+  ],
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
+  openGraph: {
+    type: "website",
+    url: SITE,
+    siteName: "Cornell Armada",
+    title: "Cornell Armada",
+    description: DESCRIPTION,
+    locale: "en_US",
+    images: [{ url: "/3x2.png", width: 1024, height: 700, alt: "Cornell Armada" }],
+  },
+  twitter: {
+    card: "summary",
+    site: "@cornellarmada",
+    creator: "@cornellarmada",
+    title: "Cornell Armada",
+    description: DESCRIPTION,
+    images: ["/3x2.png"],
+  },
+  category: "technology",
 };
 
 export default function RootLayout({

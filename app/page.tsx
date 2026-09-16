@@ -5,9 +5,48 @@ import FloatingShip from '@/components/FloatingShip';
 
 // import GameOfLife from "@/components/GameOfLife";
 
+const STRUCTURED_DATA = {
+    '@context': 'https://schema.org',
+    '@graph': [
+        {
+            '@type': 'Organization',
+            '@id': 'https://armada.build/#org',
+            name: 'Cornell Armada',
+            alternateName: ['Armada', 'Armada at Cornell', 'Cornell Armada builders club'],
+            url: 'https://armada.build',
+            logo: 'https://armada.build/3x2.png',
+            image: 'https://armada.build/ship.png',
+            slogan: 'We ship.',
+            description:
+                "The builders' club at Cornell University. A group of students who build side projects and startups, meet weekly, and ship. Since January 2024: hackathon wins at BigRedHacks, HackMIT, Hack the North and Cornell BOOM, and 70% of Cornell's Y Combinator Summer 2025 admits.",
+            foundingDate: '2024-01',
+            foundingLocation: { '@type': 'Place', name: 'Ithaca, New York, United States' },
+            location: { '@type': 'Place', name: 'Cornell University, Ithaca, NY' },
+            parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Cornell University', url: 'https://www.cornell.edu' },
+            knowsAbout: ['startups', 'side projects', 'hackathons', 'software engineering', 'Y Combinator', 'entrepreneurship', 'shipping products'],
+            sameAs: ['https://twitter.com/cornellarmada', 'https://x.com/cornellarmada', 'https://www.linkedin.com/company/armadaship'],
+            sponsor: [
+                { '@type': 'Organization', name: 'Y Combinator', url: 'https://www.ycombinator.com/' },
+                { '@type': 'Organization', name: 'Infisical', url: 'https://infisical.com/' },
+                { '@type': 'Organization', name: 'Anthropic', url: 'https://www.anthropic.com/' },
+                { '@type': 'Organization', name: 'Ithaca Hummus', url: 'https://ithacahummus.com/' },
+            ],
+        },
+        {
+            '@type': 'WebSite',
+            '@id': 'https://armada.build/#website',
+            url: 'https://armada.build',
+            name: 'Cornell Armada',
+            publisher: { '@id': 'https://armada.build/#org' },
+            inLanguage: 'en-US',
+        },
+    ],
+};
+
 export default function Home() {
     return (
         <div className='relative'>
+            <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
             {/* <GameOfLife /> */}
             <div className='grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 gap-16 sm:p-20 font-[family-name:var(--font-instrument-sans)]'>
                 <main className='flex flex-col gap-8 row-start-2 items-center sm:items-start max-w-2xl'>
@@ -116,11 +155,11 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://spotlight.realty/'
+                                href='https://apps.apple.com/us/app/restitch/id6749212071'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                Spotlight Realty
+                                ReStitch
                             </a>
                             ,{' '}
                             <a
@@ -161,11 +200,11 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://culturevisuals.com/'
+                                href='https://www.designmeetup.info/'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                Culture Visuals
+                                Design Meetup
                             </a>
                             ,{' '}
                             <a
@@ -197,11 +236,11 @@ export default function Home() {
                             ,{' '}
                             <a
                                 className='underline underline-offset-4'
-                                href='https://astra-engineering.co/'
+                                href='https://sklonuj.com/'
                                 target='_blank'
                                 rel='noopener noreferrer'
                             >
-                                Astra
+                                Sklonuj
                             </a>
                             ,{' '}
                             <a
