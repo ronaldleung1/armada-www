@@ -1,5 +1,6 @@
 // import Image from "next/image";
-import { FaLinkedin, FaXTwitter } from 'react-icons/fa6';
+import Link from 'next/link';
+import { FaAnchor, FaLinkedin, FaXTwitter } from 'react-icons/fa6';
 import FloatingShip from '@/components/FloatingShip';
 
 // import GameOfLife from "@/components/GameOfLife";
@@ -320,6 +321,13 @@ export default function Home() {
                         <FaLinkedin size={16} aria-hidden />
                         LinkedIn
                     </a>
+                    <Link
+                        className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                        href='/crew'
+                    >
+                        <FaAnchor size={14} aria-hidden />
+                        Crew
+                    </Link>
                 </footer>
             </div>
         </div>

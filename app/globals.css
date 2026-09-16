@@ -36,3 +36,157 @@ body::before {
     text-wrap: balance;
   }
 }
+
+/* ---------- Crew manifest (/crew) ---------- */
+:root {
+  --carnelian: #b31b1b;
+  --ink: #1a1918;
+  --paper: #fbfbfb;
+  --rule: rgba(26, 25, 24, 0.14);
+  --rule-strong: rgba(26, 25, 24, 0.42);
+  --muted: rgba(26, 25, 24, 0.56);
+  --faint: rgba(26, 25, 24, 0.05);
+}
+
+.crew {
+  font-family: var(--font-instrument-sans), system-ui, sans-serif;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.crew-serif { font-family: var(--font-instrument-serif), Georgia, serif; }
+.crew-pixel { font-family: 'Jacquard 12', monospace; }
+.crew-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.crew-rule { border-color: var(--rule); }
+.crew-muted { color: var(--muted); }
+
+.crew-input {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  padding: 6px 0;
+  width: 100%;
+  outline: none;
+  color: var(--ink);
+  transition: border-color 0.2s;
+}
+.crew-input:focus { border-bottom-color: var(--ink); }
+.crew-input::placeholder { color: var(--muted); }
+select.crew-input { appearance: none; cursor: pointer; }
+
+.crew-btn {
+  border: 1px solid var(--ink);
+  padding: 7px 14px;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.crew-btn:hover { background: var(--ink); color: var(--paper); }
+.crew-btn:disabled { opacity: 0.4; pointer-events: none; }
+.crew-btn-ghost { border-color: var(--rule-strong); }
+.crew-btn-red { border-color: var(--carnelian); color: var(--carnelian); }
+.crew-btn-red:hover { background: var(--carnelian); color: var(--paper); }
+
+.crew-chip {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1.2;
+  border: 1px solid var(--rule);
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.crew-chip-why { border-color: rgba(179, 27, 27, 0.35); color: var(--carnelian); }
+
+.crew-tab {
+  position: relative;
+  padding: 10px 0;
+  color: var(--muted);
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.crew-tab:hover { color: var(--ink); }
+.crew-tab[aria-selected='true'] { color: var(--ink); }
+.crew-tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--carnelian);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.crew-tab[aria-selected='true']::after { transform: scaleX(1); }
+
+.crew-row {
+  position: relative;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.crew-row::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--carnelian);
+  transform: scaleY(0);
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.crew-row:hover::before,
+.crew-row[data-selected='true']::before { transform: scaleY(1); }
+.crew-row[data-selected='true'] { background: var(--faint); }
+
+.crew-drawer {
+  box-shadow: -1px 0 0 var(--rule);
+  animation: crew-slide 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes crew-slide {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes crew-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.crew-rise { animation: crew-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes crew-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.crew-shake { animation: crew-shake 0.5s both; }
+
+@keyframes crew-draw { to { stroke-dashoffset: 0; } }
+.crew-arc {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: crew-draw 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.crew-node { cursor: pointer; transition: opacity 0.25s; }
+.crew-link { transition: opacity 0.25s; }
+.crew-node.dim, .crew-link.dim { opacity: 0.12; }
+.crew-node.soft, .crew-link.soft { opacity: 0.38; }
+.crew-node text, .crew-pin text { pointer-events: none; user-select: none; }
+.crew-pin { cursor: pointer; }
+
+.crew-scrim { background: rgba(251, 251, 251, 0.7); backdrop-filter: blur(2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .crew-rise, .crew-drawer, .crew-arc, .crew-shake { animation: none; }
+}

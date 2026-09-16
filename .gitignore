@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# crew manifest: plaintext seed, and the dev-only staged copy of the vault.
+# The committed ciphertext lives in data/crew.enc.json and is served only via the worker.
+data/crew.seed.json
+public/crew.enc.json
+.claude/settings.local.json

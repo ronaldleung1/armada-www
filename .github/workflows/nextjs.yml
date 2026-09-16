@@ -8,6 +8,10 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+    paths-ignore:
+      - "worker/**"
+      - "data/**"
+      - "**.md"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -75,6 +79,9 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
+        env:
+          # URL of the crew sync worker (repository variable). Empty = read-only manifest.
+          NEXT_PUBLIC_CREW_API_URL: ${{ vars.CREW_API_URL }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

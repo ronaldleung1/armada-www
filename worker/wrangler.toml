@@ -1,0 +1,36 @@
+name = "armada-crew"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+# Storage: one Durable Object (free plan, SQLite-backed). Holds the encrypted
+# manifest plus its last 60 versions. Nothing else to provision.
+[[durable_objects.bindings]]
+name = "VAULT_DO"
+class_name = "VaultStore"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["VaultStore"]
+
+[vars]
+ALLOWED_ORIGINS = "https://armada.build,https://www.armada.build,http://localhost:3000"
+
+# Secrets (never in this file):
+#   npx wrangler secret put CREW_GATE_TOKENS   # node scripts/crew-vault.mjs gate-tokens --pass "..." --pass "..."
+#   npx wrangler secret put CREW_ADMIN_TOKEN   # optional: any long random string; only needed to rotate the passphrase
+
+# Optional: Cloudflare's rate-limit binding (open beta, free). The worker uses
+# env.RATE_LIMITER when bound and falls back to an in-memory limiter otherwise.
+# Check the current syntax at developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit
+# [[unsafe.bindings]]
+# name = "RATE_LIMITER"
+# type = "ratelimit"
+# namespace_id = "1001"
+# simple = { limit = 60, period = 60 }
+
+# Alternative storage: commit the vault to a GitHub repo instead of the Durable
+# Object. Remove the durable_objects/migrations blocks above, set these vars and
+# `npx wrangler secret put GITHUB_TOKEN` (fine-grained PAT, Contents: read/write).
+# GITHUB_REPO = "ronaldleung1/armada-www"
+# GITHUB_BRANCH = "main"
+# VAULT_PATH = "data/crew.enc.json"
