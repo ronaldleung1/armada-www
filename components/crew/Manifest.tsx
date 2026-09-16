@@ -15,10 +15,17 @@ const SORTS: { key: SortKey; label: string }[] = [
     { key: 'updated', label: 'Updated' },
 ];
 
-/** Seniors first, then younger classes, then people who left, then unknown. */
+const DEGREE_ORDER = ['meng', 'masters', 'phd'];
+
+/** Oldest class first, then younger classes, then grad students by degree, then people who left, then unknown. */
 function yearRank(m: Member): number {
     if (m.status === 'Dropped out') return 9000 + (m.gradYear ?? 0);
-    return m.gradYear ?? (m.degree ? 9500 : 9999);
+    if (m.gradYear) return m.gradYear;
+    if (m.degree) {
+        const i = DEGREE_ORDER.indexOf(m.degree.toLowerCase().replace(/[^a-z]/g, ''));
+        return 8000 + (i === -1 ? DEGREE_ORDER.length : i);
+    }
+    return 9999;
 }
 
 function compare(sort: SortKey): (a: Hit, b: Hit) => number {
@@ -91,8 +98,8 @@ export default function Manifest({ hits, searching }: { hits: Hit[]; searching: 
                 </p>
             )}
 
-            {groups.map((g) => (
-                <div key={g.label || 'all'}>
+            {groups.map((g, gi) => (
+                <div key={`${g.label || 'all'}-${gi}`}>
                     {g.label && (
                         <h2 className='crew-serif text-2xl pt-8 pb-2 flex items-baseline gap-3'>
                             {g.label}
