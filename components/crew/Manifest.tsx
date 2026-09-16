@@ -123,6 +123,7 @@ function Row({ hit, index, searching }: { hit: Hit; index: number; searching: bo
     const selected = selectedId === m.id;
     const st = standing(m, now);
     const building = m.projects.map((v) => v.name);
+    const company = m.company?.name?.trim() ? m.company : undefined;
     const from = placeShort(m.hometown);
     const at = placeShort(m.location);
     const bday = daysUntilBirthday(m.birthday, now);
@@ -174,7 +175,14 @@ function Row({ hit, index, searching }: { hit: Hit; index: number; searching: bo
                     {m.minors.length > 0 && <span className='crew-muted'> + {m.minors.join(', ')}</span>}
                 </div>
                 <div className='hidden md:block text-sm min-w-0 truncate'>
-                    {building.length ? building.join(' · ') : <span className='crew-muted'>—</span>}
+                    {company && (
+                        <>
+                            <span className='font-medium'>{company.name}</span>
+                            {company.role && <span className='crew-muted'> ({company.role})</span>}
+                            {building.length > 0 && <span className='crew-muted px-1.5'>│</span>}
+                        </>
+                    )}
+                    {building.length ? building.join(' · ') : !company && <span className='crew-muted'>—</span>}
                 </div>
                 <div className='hidden md:flex text-sm min-w-0 items-center gap-1.5'>
                     {from || at ? (
@@ -193,7 +201,13 @@ function Row({ hit, index, searching }: { hit: Hit; index: number; searching: bo
                 </div>
 
                 <div className='md:hidden col-start-2 text-sm crew-muted truncate'>
-                    {[st ? `${st} ${shortYear(m.gradYear)}` : shortYear(m.gradYear), m.majors.join(' · '), building.slice(0, 2).join(' · '), from]
+                    {[
+                        st ? `${st} ${shortYear(m.gradYear)}` : shortYear(m.gradYear),
+                        m.majors.join(' · '),
+                        company ? `${company.name}${company.role ? ` (${company.role})` : ''}` : '',
+                        building.slice(0, 2).join(' · '),
+                        from,
+                    ]
                         .filter(Boolean)
                         .join(' · ') || 'Nothing filled in yet'}
                 </div>
