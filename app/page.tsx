@@ -287,7 +287,16 @@ export default function Home() {
                                 Funneled 70% of Cornell YC Summer 2025 admits
                                 </li>
                                 <li>
-                                We don't like people who spend all day recruiting. We don't like people who largely yap and perpetually push off shipping. We love people who are obsessively passionate about making things and working on hard problems. If you're interested, find your way in.
+                                We don't like people who spend all day recruiting. We don't like people who largely yap and perpetually push off shipping. We love people who are obsessively passionate about making things and working on hard problems. If you're interested,{' '}
+                                <a
+                                    href='https://http.cat/511'
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='hover:text-[var(--carnelian)] transition-colors'
+                                >
+                                    find your way in
+                                </a>
+                                .
                                 </li>
                                 <li>
                                     We accept treats, like books
