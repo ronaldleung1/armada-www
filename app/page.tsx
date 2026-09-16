@@ -281,7 +281,7 @@ export default function Home() {
                                 We've swept hackathons: BigRedHacks, HackMIT, HackTheNorth, Cornell BOOM, etc.
                                 </li>
                                 <li>
-                                Had seven dropouts this semester
+                                Had members chronically drop out (of school)
                                 </li>
                                 <li>
                                 Funneled 70% of Cornell YC Summer 2025 admits
