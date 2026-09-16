@@ -226,7 +226,6 @@ export default function Chart({ hits, searching }: { hits: Hit[]; searching: boo
                                 key={v.id}
                                 d={v.d}
                                 className='crew-arc'
-                                pathLength={1}
                                 fill='none'
                                 stroke='var(--carnelian)'
                                 strokeWidth={1.2}
