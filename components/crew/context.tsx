@@ -11,6 +11,8 @@ export type CrewCtx = {
     selectedId: string | null;
     select: (id: string | null) => void;
     openEditor: (id: string) => void;
+    /** Re-open the "who's holding the pen?" picker. */
+    changeEditor: () => void;
 };
 
 export const CrewContext = createContext<CrewCtx | null>(null);

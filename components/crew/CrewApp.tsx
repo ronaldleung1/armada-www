@@ -124,6 +124,8 @@ export default function CrewApp() {
         [requireEditor],
     );
 
+    const changeEditor = useCallback(() => setPending(() => () => {}), []);
+
     const addMember = () =>
         requireEditor(() => {
             setDraftNew(emptyMember(NEW_ID, editor ?? 'someone'));
@@ -265,7 +267,7 @@ export default function CrewApp() {
     }
 
     return (
-        <CrewContext.Provider value={{ members, now, editor, selectedId, select, openEditor }}>
+        <CrewContext.Provider value={{ members, now, editor, selectedId, select, openEditor, changeEditor }}>
             <div className='crew min-h-screen'>
                 <header className='px-6 sm:px-12 pt-8 max-w-[1440px] mx-auto'>
                     <div className='flex items-center justify-between gap-4'>
@@ -374,6 +376,7 @@ export default function CrewApp() {
                 {pending && (
                     <EditorPicker
                         members={members}
+                        current={editor}
                         onPick={(name) => {
                             setEditor(name);
                             localStorage.setItem(STORAGE.editor, name);
@@ -426,8 +429,8 @@ function SyncBadge({ sync }: { sync: SyncState }) {
     );
 }
 
-function EditorPicker({ members, onPick, onCancel }: { members: Member[]; onPick: (name: string) => void; onCancel: () => void }) {
-    const [picked, setPicked] = useState('');
+function EditorPicker({ members, current, onPick, onCancel }: { members: Member[]; current: string | null; onPick: (name: string) => void; onCancel: () => void }) {
+    const [picked, setPicked] = useState(current && members.some((m) => fullName(m) === current) ? current : '');
     const [typed, setTyped] = useState('');
     const chosen = typed.trim() || picked;
     const sorted = [...members].filter((m) => fullName(m)).sort((a, b) => fullName(a).localeCompare(fullName(b)));
@@ -441,7 +444,7 @@ function EditorPicker({ members, onPick, onCancel }: { members: Member[]; onPick
                     if (chosen) onPick(chosen);
                 }}
             >
-                <p className='crew-label'>Before you edit</p>
+                <p className='crew-label'>{current ? 'Change who signs your edits' : 'Before you edit'}</p>
                 <h2 className='crew-serif text-3xl leading-tight'>Who&rsquo;s holding the pen?</h2>
                 <p className='text-sm crew-muted'>Edits are signed, not locked. Anyone aboard can change anything; the log shows who did.</p>
                 <select className='crew-input' value={picked} onChange={(e) => setPicked(e.target.value)}>

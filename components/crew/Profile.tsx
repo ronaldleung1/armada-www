@@ -234,7 +234,7 @@ function cleanVentures(list: Venture[]): Venture[] {
 }
 
 function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
-    const { members, editor } = useCrew();
+    const { members, editor, changeEditor } = useCrew();
     const shared = useMemo(() => linkIndex(members), [members]);
     const [d, setD] = useState<Member>(() => JSON.parse(JSON.stringify(member)) as Member);
     const [confirmRemove, setConfirmRemove] = useState(false);
@@ -282,7 +282,9 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
                 <button type='button' onClick={onCancel} className='crew-label hover:text-[var(--ink)]'>
                     ← Cancel
                 </button>
-                <span className='crew-label'>{isNew ? 'New member' : `Editing as ${editor ?? 'someone'}`}</span>
+                <button type='button' onClick={changeEditor} className='crew-label hover:text-[var(--ink)] hover:underline underline-offset-4' title='Change who signs this edit'>
+                    {isNew ? 'New member · ' : ''}editing as {editor ?? 'someone'} · change
+                </button>
             </div>
             <h2 className='crew-serif text-3xl leading-tight'>{isNew ? 'Welcome aboard.' : fullName(member)}</h2>
 
