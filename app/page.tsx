@@ -18,11 +18,10 @@ const STRUCTURED_DATA = {
             image: 'https://armada.build/ship.png',
             slogan: 'We ship.',
             description:
-                "The builders' club at Cornell University. A group of students who build side projects and startups, meet weekly, and ship. Since January 2024: hackathon wins at BigRedHacks, HackMIT, Hack the North and Cornell BOOM, and 70% of Cornell's Y Combinator Summer 2025 admits.",
+                "The independent builders' club at Cornell, not affiliated with the university. A group of students who build side projects and startups, meet weekly, and ship. Since January 2024: hackathon wins at BigRedHacks, HackMIT, Hack the North and Cornell BOOM, and 70% of Cornell's Y Combinator Summer 2025 admits.",
             foundingDate: '2024-01',
             foundingLocation: { '@type': 'Place', name: 'Ithaca, New York, United States' },
-            location: { '@type': 'Place', name: 'Cornell University, Ithaca, NY' },
-            parentOrganization: { '@type': 'CollegeOrUniversity', name: 'Cornell University', url: 'https://www.cornell.edu' },
+            location: { '@type': 'Place', name: 'Ithaca, New York, United States' },
             knowsAbout: ['startups', 'side projects', 'hackathons', 'software engineering', 'Y Combinator', 'entrepreneurship', 'shipping products'],
             sameAs: ['https://twitter.com/cornellarmada', 'https://x.com/cornellarmada', 'https://www.linkedin.com/company/armadaship'],
             sponsor: [

@@ -19,7 +19,7 @@ const instrumentSerif = Instrument_Serif({
 
 const SITE = "https://armada.build";
 const DESCRIPTION =
-  "Cornell Armada is the builders' club at Cornell University: students who build side projects and startups, meet weekly, and ship. Home of BigRedBeds, Candytrail, Samaritan Scout, Locadapt, Filmify and GCal Wrapped, and 70% of Cornell's YC Summer 2025 founders.";
+  "Cornell Armada is the independent builders' club at Cornell: students who build side projects and startups, meet weekly, and ship. Home of BigRedBeds, Candytrail, Samaritan Scout, Locadapt, Filmify and GCal Wrapped, and 70% of Cornell's YC Summer 2025 founders.";
 
 // Search / answer-engine metadata only. Nothing here renders on the page.
 export const metadata: Metadata = {
