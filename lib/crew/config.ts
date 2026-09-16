@@ -1,14 +1,18 @@
 /**
  * Base URL of the deployed Cloudflare Worker (see worker/README.md).
  *
- * Set NEXT_PUBLIC_CREW_API_URL at build time (the Pages workflow reads the
- * CREW_API_URL repository variable). While empty, the manifest reads the
- * dev-only local copy and edits are kept as a local draft in this browser.
+ * The deployed worker URL is baked in below; NEXT_PUBLIC_CREW_API_URL (from
+ * the CREW_API_URL repository variable) overrides it at build time. Set it to
+ * "off" to run without a worker: the manifest then reads the dev-only local
+ * copy and edits are kept as a local draft in this browser.
  *
  * For local testing you can also drop a URL into localStorage under
  * "crew:api" without rebuilding.
  */
-export const CREW_API_URL = (process.env.NEXT_PUBLIC_CREW_API_URL ?? '').replace(/\/$/, '');
+/** Deployed worker (free Cloudflare account). Public URL, not a secret; override with the env var. */
+const DEFAULT_CREW_API_URL = 'https://armada-crew.armada-crew-worker.workers.dev';
+
+export const CREW_API_URL = (process.env.NEXT_PUBLIC_CREW_API_URL || DEFAULT_CREW_API_URL).replace(/\/$/, '');
 
 /**
  * Dev-only copy of the vault, staged into public/ by `npm run dev`. It is
@@ -29,7 +33,7 @@ export const STORAGE = {
 export function resolveApiUrl(): string {
     if (typeof window !== 'undefined') {
         const override = window.localStorage.getItem(STORAGE.api);
-        if (override) return override.replace(/\/$/, '');
+        if (override) return override === 'off' ? '' : override.replace(/\/$/, '');
     }
-    return CREW_API_URL;
+    return CREW_API_URL === 'off' ? '' : CREW_API_URL;
 }

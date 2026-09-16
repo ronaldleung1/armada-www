@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -38,5 +38,6 @@ next-env.d.ts
 # crew manifest: plaintext seed, and the dev-only staged copy of the vault.
 # The committed ciphertext lives in data/crew.enc.json and is served only via the worker.
 data/crew.seed.json
+data/crew.enc.json
 public/crew.enc.json
 .claude/settings.local.json
