@@ -9,6 +9,10 @@
 //                                            # upload data/crew.enc.json to the worker (seeding, or restoring a backup)
 //   node scripts/crew-vault.mjs pull --api https://... --pass "..." [--out data/crew.enc.json]
 //                                            # download the worker's current vault (backup; commit it if you like)
+//   node scripts/crew-vault.mjs versions --api https://... --pass "..."
+//                                            # list the worker's kept versions (newest first)
+//   node scripts/crew-vault.mjs restore --api https://... --pass "..." --sha <version>
+//                                            # re-publish an old version (the replaced one is kept too)
 //
 // `encrypt` keeps the existing data key when the vault already exists and a
 // --pass opens it, so browsers that are unlocked stay unlocked. Pass --rekey to
@@ -136,6 +140,31 @@ async function main() {
             console.log(`pulled version ${current.sha} into ${out}`);
             break;
         }
+        case 'versions': {
+            const api = requireApi();
+            const token = args.admin ?? (await gateToken(requirePass()));
+            const res = await fetch(`${api}/vault/history`, { headers: { Authorization: `Bearer ${token}` } });
+            if (!res.ok) fail(`worker returned ${res.status}`);
+            const { current, versions } = await res.json();
+            console.log(`current: ${current}`);
+            for (const v of versions) console.log(`${v.sha}  ${v.at.replace('T', ' ').slice(0, 19)}  ${v.message}`);
+            if (!versions.length) console.log('(no earlier versions)');
+            break;
+        }
+        case 'restore': {
+            const api = requireApi();
+            if (!args.sha) fail('pass --sha <version> (see "versions")');
+            const token = args.admin ?? (await gateToken(requirePass()));
+            const res = await fetch(`${api}/vault/restore`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sha: args.sha }),
+            });
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) fail(`restore failed (${res.status}): ${body.error ?? ''}`);
+            console.log(`restored ${args.sha}; now at version ${body.sha}`);
+            break;
+        }
         case 'stage': {
             try {
                 await copyFile(ENC_DEFAULT, STAGED);
@@ -146,7 +175,7 @@ async function main() {
             break;
         }
         default:
-            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull> [--pass ...]');
+            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore> [--pass ...]');
     }
 }
 

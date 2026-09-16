@@ -22,7 +22,6 @@ export type SyncState = {
 
 type Fetched = { vault: VaultFile; sha: string | null; source: SyncSource };
 
-export type Version = { sha: string; at: string; message: string; bytes: number };
 
 export class UnauthorizedError extends Error {}
 /** The worker could not be reached; the edit was kept as a local draft. */
@@ -221,26 +220,6 @@ export class CrewStore {
             throw new Error(`save failed (${res.status}) ${text}`.trim());
         }
         throw new Error('too many concurrent edits, try again');
-    }
-
-    /** Past versions kept by the worker, newest first. Empty without an API. */
-    async history(): Promise<Version[]> {
-        if (!this.apiConfigured || !this.gate) return [];
-        const res = await fetch(`${this.apiUrl}/vault/history`, { headers: { Authorization: `Bearer ${this.gate}` }, cache: 'no-store' });
-        if (!res.ok) return [];
-        return ((await res.json()) as { versions: Version[] }).versions ?? [];
-    }
-
-    /** Re-publish an old version; call load() afterwards. */
-    async restoreVersion(sha: string): Promise<void> {
-        if (!this.apiConfigured || !this.gate) throw new Error('no sync worker configured');
-        const res = await fetch(`${this.apiUrl}/vault/restore`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${this.gate}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sha }),
-        });
-        if (!res.ok) throw new Error(`restore failed (${res.status})`);
-        this.clearDraft();
     }
 
     private readDraft(): { base: Payload; payload: Payload } | null {

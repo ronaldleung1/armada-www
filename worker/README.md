@@ -58,8 +58,10 @@ For local testing without a rebuild, in the browser console on
 
 ## Day to day
 
-- **Undo.** Log → Versions → "Go back to this". Every save archives the version
-  it replaced; restoring archives the current one too, so nothing is ever lost.
+- **Undo.** Every save archives the version it replaced (last 60 kept). The UI
+  only shows the log; to roll back, `node scripts/crew-vault.mjs versions --api …
+  --pass …` then `restore --sha <version>`. Restoring archives the current one
+  too, so nothing is ever lost.
 - **Backup.** `node scripts/crew-vault.mjs pull --api … --pass …` writes the
   live vault to `data/crew.enc.json`; commit it whenever you feel like it.
 - **Passphrase change.** Re-encrypt (`encrypt --rekey --pass …` for each new
@@ -76,8 +78,8 @@ For local testing without a rebuild, in the browser console on
   for a shared counter.
 - Bodies over 1 MB are refused before being read.
 - The vault's wrapped keys are immutable through the API without
-  `CREW_ADMIN_TOKEN`, so a leaked passphrase cannot lock everyone out. And if
-  someone with the passphrase vandalizes the roster, Versions undoes it.
+  `CREW_ADMIN_TOKEN`, so a leaked passphrase cannot lock everyone out. And if someone with the passphrase vandalizes the
+  roster, `crew-vault.mjs restore` undoes it.
 - Optimistic concurrency: writes carry the version they were based on; a stale
   one gets a 409 and the browser merges field-by-field and retries.
 

@@ -230,19 +230,6 @@ export default function CrewApp() {
         );
     };
 
-    const loadVersions = useCallback(() => (store ? store.history() : Promise.resolve([])), [store]);
-
-    const restoreVersion = async (sha: string) => {
-        if (!store) return;
-        setSync((s) => ({ ...s, saving: true, error: undefined }));
-        try {
-            await store.restoreVersion(sha);
-            await loadAll(store);
-        } catch (e) {
-            setSync((s) => ({ ...s, saving: false, error: (e as Error).message }));
-        }
-    };
-
     const lock = () => {
         store?.forget();
         setPayload(null);
@@ -388,14 +375,7 @@ export default function CrewApp() {
                     />
                 )}
 
-                {showLog && payload && (
-                    <LogPanel
-                        log={payload.log}
-                        onClose={() => setShowLog(false)}
-                        loadVersions={store?.apiConfigured ? loadVersions : undefined}
-                        onRestore={store?.apiConfigured ? restoreVersion : undefined}
-                    />
-                )}
+                {showLog && payload && <LogPanel log={payload.log} onClose={() => setShowLog(false)} />}
             </div>
         </CrewContext.Provider>
     );

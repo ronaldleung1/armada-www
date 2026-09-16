@@ -10,8 +10,9 @@ encrypted JSON blob, no database, no ongoing costs.
   rate-limits guesses. `npm run dev` stages a gitignored local copy into
   `public/` so development works without the worker.
 - **Edits.** Anyone can edit anyone. Saves go through a tiny Cloudflare Worker
-  with its own storage (a free Durable Object) that keeps the last 60 versions,
-  so anything can be undone from Log → Versions. See
+  with its own storage (a free Durable Object) that keeps the last 60 versions;
+  the UI shows the signed edit log, and `scripts/crew-vault.mjs versions` /
+  `restore` roll back when needed. See
   [`worker/README.md`](../../worker/README.md) for setup and why it must live
   on a *free* Cloudflare account. Concurrent edits merge field-by-field.
 - **Views.** Manifest (sortable list), Graph (force layout with switchable
