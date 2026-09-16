@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { MEMBER_STATUSES, type Member, type MemberStatus, type Place, type Venture } from '@/lib/crew/types';
+import { MEMBER_STATUSES, type Company, type Member, type MemberStatus, type Place, type Venture } from '@/lib/crew/types';
 import { geocode } from '@/lib/crew/geo';
 import { resolveInviter } from '@/lib/crew/edges';
 import { linkIndex, linkKey } from '@/lib/crew/links';
@@ -67,14 +67,25 @@ function View({ member: m, onClose, onEdit }: Props) {
                     <h2 className='crew-serif text-4xl leading-none break-words'>{fullName(m) || 'Unnamed'}</h2>
                     {m.nickname && <p className='crew-serif italic crew-muted text-xl mt-1'>&ldquo;{m.nickname}&rdquo;</p>}
                     {meta && <p className='text-sm mt-2'>{meta}</p>}
+                    {m.company && (
+                        <p className='text-sm mt-1'>
+                            {m.company.role ? `${m.company.role} at ` : 'At '}
+                            {normalizeUrl(m.company.url) ? (
+                                <a href={normalizeUrl(m.company.url)} target='_blank' rel='noopener noreferrer' className='underline underline-offset-4'>
+                                    {m.company.name}
+                                </a>
+                            ) : (
+                                m.company.name
+                            )}
+                        </p>
+                    )}
                 </div>
             </div>
 
             {m.bio && <p className='text-[15px] leading-relaxed crew-rise'>{m.bio}</p>}
 
             <dl className='flex flex-col gap-4 border-t crew-rule pt-5 crew-rise' style={{ animationDelay: '60ms' }}>
-                <Line label='Building'>{m.ventures.length ? <LinkList items={m.ventures} shared={shared} /> : <Empty />}</Line>
-                <Line label='Side projects'>{m.projects.length ? <LinkList items={m.projects} shared={shared} /> : <Empty />}</Line>
+                <Line label='Projects'>{m.projects.length ? <LinkList items={m.projects} shared={shared} /> : <Empty />}</Line>
                 <Line label='Studying'>
                     {m.majors.length ? m.majors.join(', ') : <Empty />}
                     {m.minors.length > 0 && <span className='crew-muted'> · minor{m.minors.length > 1 ? 's' : ''} in {m.minors.join(', ')}</span>}
@@ -226,6 +237,17 @@ function cleanPlace(p?: Place): Place | undefined {
     return out;
 }
 
+function cleanCompany(c?: Company): Company | undefined {
+    const name = c?.name?.trim();
+    if (!name) return undefined;
+    const out: Company = { name };
+    const url = normalizeUrl(c?.url);
+    if (url) out.url = url;
+    const role = c?.role?.trim();
+    if (role) out.role = role;
+    return out;
+}
+
 function cleanVentures(list: Venture[]): Venture[] {
     return list
         .map((v) => ({ name: v.name.trim(), url: normalizeUrl(v.url) }))
@@ -265,8 +287,8 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
             avatar: normalizeUrl(d.avatar),
             hometown: cleanPlace(d.hometown),
             location: cleanPlace(d.location),
-            ventures: cleanVentures(d.ventures),
             projects: cleanVentures(d.projects),
+            company: cleanCompany(d.company),
             majors: d.majors.map((s) => s.trim()).filter(Boolean),
             minors: d.minors.map((s) => s.trim()).filter(Boolean),
             interests: d.interests.map((s) => s.trim()).filter(Boolean),
@@ -332,9 +354,16 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
                 <ListText label='Minors' value={d.minors} onChange={(v) => set('minors', v)} placeholder='Comma-separated' />
             </Section>
 
-            <Section title='Building'>
-                <Links label='Businesses, startups, jobs' items={d.ventures} onChange={(v) => set('ventures', v)} shared={shared} />
-                <Links label='Side projects' items={d.projects} onChange={(v) => set('projects', v)} shared={shared} />
+            <Section title='Projects'>
+                <Links label='Startups, side projects, anything you build' items={d.projects} onChange={(v) => set('projects', v)} shared={shared} />
+            </Section>
+
+            <Section title='Company / role (optional)'>
+                <div className='grid grid-cols-2 gap-4'>
+                    <Text label='Company' value={d.company?.name ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), name: v })} placeholder='Leave blank if none' />
+                    <Text label='Role' value={d.company?.role ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), role: v })} placeholder='Founder, intern, PhD…' />
+                </div>
+                <Text label='Company link' value={d.company?.url ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), url: v })} placeholder='https://…' />
             </Section>
 
             <Section title='Into'>

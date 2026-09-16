@@ -6,7 +6,7 @@ export type Lens = 'invites' | 'projects' | 'majors' | 'interests' | 'roots' | '
 
 export const LENSES: { id: Lens; label: string; blurb: string }[] = [
     { id: 'invites', label: 'Who brought whom', blurb: 'The family tree. Arrows point from the person who invited to the person who joined.' },
-    { id: 'projects', label: 'Projects', blurb: 'People tied to what they are building. Shared projects pull co-builders together.' },
+    { id: 'projects', label: 'Projects', blurb: 'People tied to what they build and where they work. Shared names pull co-builders together.' },
     { id: 'majors', label: 'Majors', blurb: 'Solid lines are majors, dashed are minors.' },
     { id: 'interests', label: 'Interests', blurb: 'Only interests shared by at least two people, after folding synonyms.' },
     { id: 'roots', label: 'Roots', blurb: 'Hometowns grouped by US state or country.' },
@@ -110,12 +110,12 @@ export function buildGraph(members: Member[], lens: Lens): Graph {
         case 'projects': {
             for (const m of members) {
                 const seen = new Set<string>();
-                for (const v of [...m.ventures, ...m.projects]) {
-                    const key = projectKey(v.name);
+                const names = [...m.projects.map((v) => v.name), ...(m.company ? [m.company.name] : [])];
+                for (const name of names) {
+                    const key = projectKey(name);
                     if (!key || seen.has(key)) continue;
                     seen.add(key);
-                    const h = hub(key, v.name);
-                    links.push({ source: m.id, target: h.id });
+                    links.push({ source: m.id, target: hub(key, name).id });
                 }
             }
             break;

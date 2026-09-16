@@ -273,13 +273,18 @@ export function normalizePayload(p: Payload): Payload {
     };
 }
 
-function normalizeMember(m: Member): Member {
+function normalizeMember(raw: Member): Member {
+    // Older payloads split "ventures" from "projects"; fold them together.
+    const { ventures, ...m } = raw as Member & { ventures?: Member['projects'] };
+    const projects = [...(m.projects ?? [])];
+    for (const v of ventures ?? []) {
+        if (!projects.some((p) => p.name.trim().toLowerCase() === v.name.trim().toLowerCase())) projects.push(v);
+    }
     return {
         ...m,
         majors: m.majors ?? [],
         minors: m.minors ?? [],
-        ventures: m.ventures ?? [],
-        projects: m.projects ?? [],
+        projects,
         interests: m.interests ?? [],
         status: m.status ?? 'Active',
     };

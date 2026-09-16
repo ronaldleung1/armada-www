@@ -161,8 +161,8 @@ const FIELDS: Field[] = [
     },
     { key: 'majors', label: 'major', weight: 6, get: (m) => m.majors },
     { key: 'minors', label: 'minor', weight: 4, get: (m) => m.minors },
-    { key: 'ventures', label: 'building', weight: 7, get: (m) => m.ventures.map((v) => v.name) },
     { key: 'projects', label: 'project', weight: 7, get: (m) => m.projects.map((v) => v.name) },
+    { key: 'company', label: 'works at', weight: 7, get: (m) => (m.company ? [m.company.name, ...(m.company.role ? [m.company.role] : [])] : []) },
     { key: 'interests', label: 'interest', weight: 5, get: (m) => m.interests },
     {
         key: 'hometown',
@@ -180,7 +180,7 @@ const FIELDS: Field[] = [
         key: 'links',
         label: 'link',
         weight: 2,
-        get: (m) => [m.website, m.linkedin, m.x, m.github, ...m.ventures.map((v) => v.url), ...m.projects.map((v) => v.url)].filter(Boolean).map((u) => hostOf(u!)),
+        get: (m) => [m.website, m.linkedin, m.x, m.github, m.company?.url, ...m.projects.map((v) => v.url)].filter(Boolean).map((u) => hostOf(u!)),
     },
     { key: 'email', label: 'email', weight: 3, get: (m) => (m.email ? [m.email, m.email.split('@')[0]] : []) },
     { key: 'bio', label: 'bio', weight: 2, get: (m) => (m.bio ? [m.bio] : []) },

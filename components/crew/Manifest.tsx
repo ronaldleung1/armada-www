@@ -88,7 +88,7 @@ export default function Manifest({ hits, searching }: { hits: Hit[]; searching: 
                 <span>Name</span>
                 <span>Year</span>
                 <span>Studying</span>
-                <span>Building</span>
+                <span>Projects</span>
                 <span>Home → now</span>
             </div>
 
@@ -122,7 +122,7 @@ function Row({ hit, index, searching }: { hit: Hit; index: number; searching: bo
     const m = hit.member;
     const selected = selectedId === m.id;
     const st = standing(m, now);
-    const building = [...m.ventures, ...m.projects].map((v) => v.name);
+    const building = m.projects.map((v) => v.name);
     const from = placeShort(m.hometown);
     const at = placeShort(m.location);
     const bday = daysUntilBirthday(m.birthday, now);

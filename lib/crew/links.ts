@@ -10,7 +10,7 @@ export function linkKey(name: string): string {
 export function linkIndex(members: Member[]): Map<string, string> {
     const map = new Map<string, string>();
     for (const m of members) {
-        for (const v of [...m.ventures, ...m.projects]) {
+        for (const v of [...m.projects, ...(m.company ? [m.company] : [])]) {
             const key = linkKey(v.name);
             if (v.url && key && !map.has(key)) map.set(key, v.url);
         }
@@ -34,11 +34,10 @@ export function propagateLinks(members: Member[], index: Map<string, string> = l
                 touched = true;
                 return { ...v, url };
             });
-        const ventures = fill(m.ventures);
         const projects = fill(m.projects);
         if (!touched) return m;
         changed.push(m.id);
-        return { ...m, ventures, projects };
+        return { ...m, projects };
     });
     return { members: out, changed };
 }

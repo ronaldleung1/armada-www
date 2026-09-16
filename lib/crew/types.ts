@@ -4,6 +4,14 @@ export type Venture = {
     url?: string;
 };
 
+/** Where someone works right now, if anywhere. Optional; most students have none. */
+export type Company = {
+    name: string;
+    url?: string;
+    /** "Founder", "Product Intern", "Physics PhD"... */
+    role?: string;
+};
+
 /** A place with optional coordinates (lat/lng in degrees). */
 export type Place = {
     name: string;
@@ -47,10 +55,10 @@ export type Member = {
     degree?: string;
     majors: string[];
     minors: string[];
-    /** Businesses, startups, jobs. */
-    ventures: Venture[];
-    /** Side projects. */
+    /** Startups, side projects, anything they build. */
     projects: Venture[];
+    /** Current employer / role, when they have one. */
+    company?: Company;
     interests: string[];
     hometown?: Place;
     /** Where they are right now. */
@@ -107,7 +115,6 @@ export function emptyMember(id: string, by: string): Member {
         status: 'Active',
         majors: [],
         minors: [],
-        ventures: [],
         projects: [],
         interests: [],
         updatedAt: new Date().toISOString(),
