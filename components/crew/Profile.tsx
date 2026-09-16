@@ -5,7 +5,7 @@ import { MEMBER_STATUSES, type Company, type Member, type MemberStatus, type Pla
 import { geocode } from '@/lib/crew/geo';
 import { resolveInviter } from '@/lib/crew/edges';
 import { linkIndex, linkKey } from '@/lib/crew/links';
-import { birthdayLabel, daysUntilBirthday, formatPhone, fullName, hasCoords, hostOf, joinedLabel, normalizeUrl, relTime, shortYear, splitList, standing, xHandle } from '@/lib/crew/util';
+import { birthdayLabel, daysUntilBirthday, formatPhone, fullName, hasCoords, hostOf, joinedLabel, normalizeUrl, prettyUrl, relTime, shortYear, splitList, standing, xHandle } from '@/lib/crew/util';
 import Monogram from './Monogram';
 import { useCrew } from './context';
 
@@ -237,6 +237,20 @@ function cleanPlace(p?: Place): Place | undefined {
     return out;
 }
 
+/** Show URLs without the scheme while editing; normalizeUrl restores it on save. */
+function prettifyUrls(m: Member): Member {
+    return {
+        ...m,
+        linkedin: prettyUrl(m.linkedin),
+        website: prettyUrl(m.website),
+        x: prettyUrl(m.x),
+        github: prettyUrl(m.github),
+        avatar: prettyUrl(m.avatar),
+        company: m.company ? { ...m.company, url: prettyUrl(m.company.url) } : undefined,
+        projects: m.projects.map((p) => ({ ...p, url: prettyUrl(p.url) })),
+    };
+}
+
 function cleanCompany(c?: Company): Company | undefined {
     const name = c?.name?.trim();
     if (!name) return undefined;
@@ -258,7 +272,7 @@ function cleanVentures(list: Venture[]): Venture[] {
 function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
     const { members, editor, changeEditor } = useCrew();
     const shared = useMemo(() => linkIndex(members), [members]);
-    const [d, setD] = useState<Member>(() => JSON.parse(JSON.stringify(member)) as Member);
+    const [d, setD] = useState<Member>(() => prettifyUrls(JSON.parse(JSON.stringify(member)) as Member));
     const [confirmRemove, setConfirmRemove] = useState(false);
     const set = <K extends keyof Member>(k: K, v: Member[K]) => setD((prev) => ({ ...prev, [k]: v }));
 
@@ -338,7 +352,7 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
                     />
                     <Text label='Degree, if not undergrad' value={d.degree ?? ''} onChange={(v) => set('degree', v)} placeholder='Masters, PhD, MEng' />
                 </div>
-                <Text label='Avatar URL' value={d.avatar ?? ''} onChange={(v) => set('avatar', v)} placeholder='blank keeps your initials' />
+                <Text label='Avatar image link' value={d.avatar ?? ''} onChange={(v) => set('avatar', v)} placeholder='blank keeps your initials' />
             </Section>
 
             <Section title='Reach'>
@@ -363,7 +377,7 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
                     <Text label='Company' value={d.company?.name ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), name: v })} placeholder='Leave blank if none' />
                     <Text label='Role' value={d.company?.role ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), role: v })} placeholder='Founder, intern, PhD…' />
                 </div>
-                <Text label='Company link' value={d.company?.url ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), url: v })} placeholder='https://…' />
+                <Text label='Company link' value={d.company?.url ?? ''} onChange={(v) => set('company', { ...(d.company ?? { name: '' }), url: v })} placeholder='company.com' />
             </Section>
 
             <Section title='Into'>

@@ -86,11 +86,18 @@ export function relTime(iso?: string, now: Date = new Date()): string {
     return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+/** Canonical stored form: scheme added, a bare trailing slash dropped. */
 export function normalizeUrl(u?: string): string | undefined {
     const s = (u ?? '').trim();
     if (!s) return undefined;
-    if (/^https?:\/\//i.test(s)) return s;
-    return `https://${s}`;
+    const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+    return withScheme.replace(/^(https?:\/\/[^/]+)\/$/i, '$1');
+}
+
+/** Editing form: no scheme, no bare trailing slash. Saving runs normalizeUrl. */
+export function prettyUrl(u?: string): string | undefined {
+    if (!u) return u;
+    return u.trim().replace(/^https?:\/\//i, '').replace(/^([^/]+)\/$/, '$1');
 }
 
 export function hostOf(url?: string): string {
