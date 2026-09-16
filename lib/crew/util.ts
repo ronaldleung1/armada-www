@@ -115,35 +115,19 @@ export function xHandle(url?: string): string {
     return m ? `@${m[1]}` : url.replace(/^@/, '@');
 }
 
-const US_ALIASES = ['united states', 'usa', 'us', 'u.s.', 'u.s.a.', 'america'];
+const US_ALIASES = new Set(['united states', 'usa', 'us', 'u.s.', 'u.s.a.', 'u.s', 'america', 'united states of america']);
 
-/** Country (last comma segment) of a free-text place. */
-export function placeCountry(p?: Place): string {
-    if (!p?.name) return '';
-    const parts = p.name.split(',').map((s) => s.trim()).filter(Boolean);
-    return parts[parts.length - 1] ?? '';
-}
-
-/** US state when the place is in the US, otherwise the country. */
-export function regionKey(p?: Place): string {
-    if (!p?.name) return '';
-    const parts = p.name.split(',').map((s) => s.trim()).filter(Boolean);
-    const country = parts[parts.length - 1] ?? '';
-    if (US_ALIASES.includes(country.toLowerCase()) && parts.length >= 2) {
-        return parts[parts.length - 2];
-    }
-    return country;
-}
-
-/** Short display for a place: "Prague" from "Prague, Czechia". */
-export function placeShort(p?: Place): string {
-    if (!p?.name) return '';
-    const parts = p.name.split(',').map((s) => s.trim()).filter(Boolean);
-    if (parts.length >= 3 && US_ALIASES.includes(parts[parts.length - 1].toLowerCase())) {
-        return `${parts[0]}, ${abbrevState(parts[parts.length - 2])}`;
-    }
-    return parts.length > 1 ? `${parts[0]}, ${parts[parts.length - 1]}` : parts[0];
-}
+const COUNTRY_ALIASES: Record<string, string> = {
+    uk: 'United Kingdom', 'u.k.': 'United Kingdom', england: 'United Kingdom', scotland: 'United Kingdom', wales: 'United Kingdom',
+    'great britain': 'United Kingdom', britain: 'United Kingdom',
+    'czech republic': 'Czechia', czechia: 'Czechia',
+    prc: 'China', "people's republic of china": 'China', 'mainland china': 'China',
+    hk: 'Hong Kong', 'hong kong sar': 'Hong Kong', 'hong kong, china': 'Hong Kong',
+    korea: 'South Korea', 'republic of korea': 'South Korea', 'korea, south': 'South Korea',
+    uae: 'United Arab Emirates', holland: 'Netherlands', 'the netherlands': 'Netherlands', deutschland: 'Germany',
+    roc: 'Taiwan', 'taiwan (roc)': 'Taiwan', 'republic of china': 'Taiwan',
+    ksa: 'Saudi Arabia', 'kingdom of saudi arabia': 'Saudi Arabia',
+};
 
 const STATE_ABBR: Record<string, string> = {
     alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA', colorado: 'CO',
@@ -157,9 +141,76 @@ const STATE_ABBR: Record<string, string> = {
     tennessee: 'TN', texas: 'TX', utah: 'UT', vermont: 'VT', virginia: 'VA', washington: 'WA',
     'west virginia': 'WV', wisconsin: 'WI', wyoming: 'WY', 'district of columbia': 'DC',
 };
+const STATE_BY_ABBR: Record<string, string> = Object.fromEntries(Object.entries(STATE_ABBR).map(([name, ab]) => [ab.toLowerCase(), name]));
+
+function titleCase(s: string): string {
+    return s.replace(/\b\w+/g, (w) => (w === 'of' ? w : w[0].toUpperCase() + w.slice(1)));
+}
+
+function isUS(segment: string): boolean {
+    return US_ALIASES.has(segment.trim().toLowerCase());
+}
+
+/** "MA", "ma.", "Massachusetts" -> "Massachusetts"; null when it isn't a US state. */
+export function canonState(segment: string): string | null {
+    const n = segment.trim().toLowerCase().replace(/\.$/, '');
+    if (STATE_ABBR[n]) return titleCase(n);
+    if (STATE_BY_ABBR[n]) return titleCase(STATE_BY_ABBR[n]);
+    return null;
+}
+
+/** "USA" -> "United States", "England" -> "United Kingdom", otherwise trimmed as written. */
+export function canonCountry(segment: string): string {
+    const t = segment.trim();
+    const n = t.toLowerCase();
+    if (US_ALIASES.has(n)) return 'United States';
+    return COUNTRY_ALIASES[n] ?? t;
+}
+
+function segments(p?: Place): string[] {
+    return (p?.name ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+/** Canonical country of a free-text place. "Boston, MA" is the United States. */
+export function placeCountry(p?: Place): string {
+    const parts = segments(p);
+    if (!parts.length) return '';
+    const last = parts[parts.length - 1];
+    if (isUS(last) || canonState(last)) return 'United States';
+    return canonCountry(last);
+}
+
+/**
+ * Grouping key for the Roots lens: a canonical US state when the place is in
+ * the US ("Boston, MA" and "Boston, Massachusetts, USA" both give
+ * "Massachusetts"), otherwise the canonical country.
+ */
+export function regionKey(p?: Place): string {
+    const parts = segments(p);
+    if (!parts.length) return '';
+    const last = parts[parts.length - 1];
+    if (isUS(last)) {
+        if (parts.length < 2) return 'United States';
+        return canonState(parts[parts.length - 2]) ?? parts[parts.length - 2];
+    }
+    return canonState(last) ?? canonCountry(last);
+}
+
+/** Short display for a place: "Prague, Czechia" or "Boston, MA". */
+export function placeShort(p?: Place): string {
+    const parts = segments(p);
+    if (!parts.length) return '';
+    const last = parts[parts.length - 1];
+    if (parts.length >= 3 && isUS(last)) return `${parts[0]}, ${abbrevState(parts[parts.length - 2])}`;
+    if (parts.length === 2 && canonState(last)) return `${parts[0]}, ${abbrevState(last)}`;
+    if (parts.length > 1) return `${parts[0]}, ${canonCountry(last)}`;
+    return parts[0];
+}
 
 export function abbrevState(s: string): string {
-    return STATE_ABBR[s.toLowerCase()] ?? s;
+    const n = s.trim().toLowerCase().replace(/\.$/, '');
+    if (STATE_BY_ABBR[n]) return n.toUpperCase();
+    return STATE_ABBR[n] ?? s.trim();
 }
 
 export function hasCoords(p?: Place): p is Place & { lat: number; lng: number } {
