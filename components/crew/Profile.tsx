@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MEMBER_STATUSES, type Member, type MemberStatus, type Place, type Venture } from '@/lib/crew/types';
 import { geocode } from '@/lib/crew/geo';
 import { resolveInviter } from '@/lib/crew/edges';
+import { linkIndex, linkKey } from '@/lib/crew/links';
 import { birthdayLabel, daysUntilBirthday, formatPhone, fullName, hasCoords, hostOf, joinedLabel, normalizeUrl, relTime, shortYear, splitList, standing, xHandle } from '@/lib/crew/util';
 import Monogram from './Monogram';
 import { useCrew } from './context';
@@ -36,6 +37,7 @@ function View({ member: m, onClose, onEdit }: Props) {
     const { members, now, select } = useCrew();
     const inviter = resolveInviter(members, m.invitedBy);
     const invited = members.filter((x) => x.invitedBy && resolveInviter(members, x.invitedBy)?.id === m.id);
+    const shared = useMemo(() => linkIndex(members), [members]);
     const st = standing(m, now);
     const meta = [m.role && m.role !== 'Member' ? m.role : null, st ? `${st} ${shortYear(m.gradYear)}`.trim() : null, m.status !== 'Active' ? m.status : null]
         .filter(Boolean)
@@ -71,8 +73,8 @@ function View({ member: m, onClose, onEdit }: Props) {
             {m.bio && <p className='text-[15px] leading-relaxed crew-rise'>{m.bio}</p>}
 
             <dl className='flex flex-col gap-4 border-t crew-rule pt-5 crew-rise' style={{ animationDelay: '60ms' }}>
-                <Line label='Building'>{m.ventures.length ? <LinkList items={m.ventures} /> : <Empty />}</Line>
-                <Line label='Side projects'>{m.projects.length ? <LinkList items={m.projects} /> : <Empty />}</Line>
+                <Line label='Building'>{m.ventures.length ? <LinkList items={m.ventures} shared={shared} /> : <Empty />}</Line>
+                <Line label='Side projects'>{m.projects.length ? <LinkList items={m.projects} shared={shared} /> : <Empty />}</Line>
                 <Line label='Studying'>
                     {m.majors.length ? m.majors.join(', ') : <Empty />}
                     {m.minors.length > 0 && <span className='crew-muted'> · minor{m.minors.length > 1 ? 's' : ''} in {m.minors.join(', ')}</span>}
@@ -194,11 +196,11 @@ function Unpinned() {
     return <span className='crew-muted text-xs'> · not on the chart yet</span>;
 }
 
-function LinkList({ items }: { items: Venture[] }) {
+function LinkList({ items, shared }: { items: Venture[]; shared: Map<string, string> }) {
     return (
         <span className='flex flex-wrap gap-x-3 gap-y-1'>
             {items.map((v, i) => {
-                const href = normalizeUrl(v.url);
+                const href = normalizeUrl(v.url ?? shared.get(linkKey(v.name)));
                 return href ? (
                     <a key={`${v.name}-${i}`} href={href} target='_blank' rel='noopener noreferrer' className='underline underline-offset-4'>
                         {v.name}
@@ -233,6 +235,7 @@ function cleanVentures(list: Venture[]): Venture[] {
 
 function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
     const { members, editor } = useCrew();
+    const shared = useMemo(() => linkIndex(members), [members]);
     const [d, setD] = useState<Member>(() => JSON.parse(JSON.stringify(member)) as Member);
     const [confirmRemove, setConfirmRemove] = useState(false);
     const set = <K extends keyof Member>(k: K, v: Member[K]) => setD((prev) => ({ ...prev, [k]: v }));
@@ -328,8 +331,8 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
             </Section>
 
             <Section title='Building'>
-                <Links label='Businesses, startups, jobs' items={d.ventures} onChange={(v) => set('ventures', v)} />
-                <Links label='Side projects' items={d.projects} onChange={(v) => set('projects', v)} />
+                <Links label='Businesses, startups, jobs' items={d.ventures} onChange={(v) => set('ventures', v)} shared={shared} />
+                <Links label='Side projects' items={d.projects} onChange={(v) => set('projects', v)} shared={shared} />
             </Section>
 
             <Section title='Into'>
@@ -501,7 +504,7 @@ function ListText({ label, value, onChange, placeholder }: { label: string; valu
     );
 }
 
-function Links({ label, items, onChange }: { label: string; items: Venture[]; onChange: (v: Venture[]) => void }) {
+function Links({ label, items, onChange, shared }: { label: string; items: Venture[]; onChange: (v: Venture[]) => void; shared: Map<string, string> }) {
     const rows = items.length ? items : [{ name: '' }];
     const update = (i: number, patch: Partial<Venture>) => {
         const next = rows.map((r, j) => (j === i ? { ...r, ...patch } : r));
@@ -513,7 +516,12 @@ function Links({ label, items, onChange }: { label: string; items: Venture[]; on
             {rows.map((r, i) => (
                 <div key={i} className='grid grid-cols-[1fr_1fr_auto] gap-3 items-end'>
                     <input className='crew-input' value={r.name} onChange={(e) => update(i, { name: e.target.value })} placeholder='Name' />
-                    <input className='crew-input' value={r.url ?? ''} onChange={(e) => update(i, { url: e.target.value })} placeholder='Link (optional)' />
+                    <input
+                        className='crew-input'
+                        value={r.url ?? ''}
+                        onChange={(e) => update(i, { url: e.target.value })}
+                        placeholder={shared.get(linkKey(r.name)) ? `shared: ${hostOf(shared.get(linkKey(r.name)))}` : 'Link (optional)'}
+                    />
                     <button
                         type='button'
                         className='crew-muted hover:text-[var(--carnelian)] pb-1.5 text-lg leading-none'

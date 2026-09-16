@@ -7,6 +7,7 @@ import { search } from '@/lib/crew/search';
 import { CrewStore, OfflineError, UnauthorizedError, type SyncState } from '@/lib/crew/store';
 import { emptyMember, type LogEntry, type Member, type Payload } from '@/lib/crew/types';
 import { changedFields, fullName, relTime, slugify, uniqueId } from '@/lib/crew/util';
+import { propagateLinks } from '@/lib/crew/links';
 import Chart from './Chart';
 import Gate from './Gate';
 import Graph from './Graph';
@@ -204,8 +205,13 @@ export default function CrewApp() {
             list = members.map((m) => (m.id === next.id ? updated : m));
             entry = { at, by, memberId: next.id, memberName: fullName(updated), action: 'edit', fields };
         }
+        // A link given to a project name flows to everyone else listing that exact
+        // name without one. Existing links are never overwritten.
+        const linked = propagateLinks(list);
+        const others = linked.changed.filter((id) => id !== entry.memberId);
+        if (others.length) entry.fields = [...entry.fields, `linked ${others.length} other profile${others.length === 1 ? '' : 's'}`];
         setMode('view');
-        await commit(list, entry, `crew: ${by} ${isNew ? 'added' : 'updated'} ${entry.memberName}`);
+        await commit(linked.members, entry, `crew: ${by} ${isNew ? 'added' : 'updated'} ${entry.memberName}`);
     };
 
     const removeMember = async () => {
