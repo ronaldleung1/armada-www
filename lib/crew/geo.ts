@@ -1,4 +1,4 @@
-import { abbrevState, canonCountry } from './util';
+import { CITY_STATES, abbrevState, canonCountry } from './util';
 
 /**
  * Free, keyless geocoding via OpenStreetMap's Nominatim. Called when a member
@@ -37,6 +37,7 @@ export function formatPlaceName(typed: string, row: NominatimRow): string {
     const a = row.address ?? {};
     const kind = row.addresstype ?? row.type ?? '';
     const country = canonCountry(a.country ?? '');
+    if (CITY_STATES.has(typedCity.toLowerCase())) return typedCity;
     if (kind === 'country' || (country && country.toLowerCase() === typedCity.toLowerCase())) return country || typedCity;
     if ((a.country_code ?? '').toLowerCase() === 'us') {
         const iso = a['ISO3166-2-lvl4'];

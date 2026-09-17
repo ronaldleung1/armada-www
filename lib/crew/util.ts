@@ -129,6 +129,9 @@ const COUNTRY_ALIASES: Record<string, string> = {
     ksa: 'Saudi Arabia', 'kingdom of saudi arabia': 'Saudi Arabia',
 };
 
+/** Places that are their own country for our purposes; never given a ", Country" suffix. */
+export const CITY_STATES = new Set(['hong kong', 'macau', 'macao', 'singapore', 'monaco', 'vatican city']);
+
 const STATE_ABBR: Record<string, string> = {
     alabama: 'AL', alaska: 'AK', arizona: 'AZ', arkansas: 'AR', california: 'CA', colorado: 'CO',
     connecticut: 'CT', delaware: 'DE', florida: 'FL', georgia: 'GA', hawaii: 'HI', idaho: 'ID',
@@ -175,6 +178,7 @@ function segments(p?: Place): string[] {
 export function placeCountry(p?: Place): string {
     const parts = segments(p);
     if (!parts.length) return '';
+    if (CITY_STATES.has(parts[0].toLowerCase())) return titleCase(parts[0].toLowerCase());
     const last = parts[parts.length - 1];
     if (isUS(last) || canonState(last)) return 'United States';
     return canonCountry(last);
@@ -188,6 +192,7 @@ export function placeCountry(p?: Place): string {
 export function regionKey(p?: Place): string {
     const parts = segments(p);
     if (!parts.length) return '';
+    if (CITY_STATES.has(parts[0].toLowerCase())) return titleCase(parts[0].toLowerCase());
     const last = parts[parts.length - 1];
     if (isUS(last)) {
         if (parts.length < 2) return 'United States';
