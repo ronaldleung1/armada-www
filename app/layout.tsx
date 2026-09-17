@@ -52,15 +52,15 @@ export const metadata: Metadata = {
     title: "Cornell Armada",
     description: DESCRIPTION,
     locale: "en_US",
-    images: [{ url: "/3x2.png", width: 1024, height: 700, alt: "Cornell Armada" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Are you shipping? Or just yapping? armada.build" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     site: "@cornellarmada",
     creator: "@cornellarmada",
     title: "Cornell Armada",
     description: DESCRIPTION,
-    images: ["/3x2.png"],
+    images: ["/og.png"],
   },
   category: "technology",
 };
