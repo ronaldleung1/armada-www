@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { MEMBER_STATUSES, type Company, type Member, type MemberStatus, type Place, type Venture } from '@/lib/crew/types';
-import { geocode } from '@/lib/crew/geo';
+import { geocode, placeNeedsLookup } from '@/lib/crew/geo';
 import { resolveInviter } from '@/lib/crew/edges';
 import { linkIndex, linkKey } from '@/lib/crew/links';
 import { birthdayLabel, daysUntilBirthday, formatPhone, fullName, hasCoords, hostOf, joinedLabel, normalizeUrl, prettyUrl, relTime, shortYear, splitList, standing, xHandle } from '@/lib/crew/util';
@@ -274,14 +274,41 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
     const shared = useMemo(() => linkIndex(members), [members]);
     const [d, setD] = useState<Member>(() => prettifyUrls(JSON.parse(JSON.stringify(member)) as Member));
     const [confirmRemove, setConfirmRemove] = useState(false);
+    const [locating, setLocating] = useState(false);
     const set = <K extends keyof Member>(k: K, v: Member[K]) => setD((prev) => ({ ...prev, [k]: v }));
 
     const others = members.filter((m) => m.id !== member.id).sort((a, b) => fullName(a).localeCompare(fullName(b)));
     const [inviterOther, setInviterOther] = useState(!!d.invitedBy && !others.some((o) => o.id === d.invitedBy));
 
+    /** Pin un-pinned places and append the state/country, one Nominatim call each, a second apart. */
+    async function completePlaces(): Promise<{ hometown?: Place; location?: Place }> {
+        const out = { hometown: cleanPlace(d.hometown), location: cleanPlace(d.location) };
+        let calls = 0;
+        for (const key of ['hometown', 'location'] as const) {
+            const p = out[key];
+            if (!p || !placeNeedsLookup(p)) continue;
+            if (calls > 0) await new Promise((r) => setTimeout(r, 1100));
+            calls++;
+            try {
+                const hit = await geocode(p.name);
+                if (hit) out[key] = { name: p.name.includes(',') ? p.name : hit.name, lat: hasCoords(p) ? p.lat : hit.lat, lng: hasCoords(p) ? p.lng : hit.lng };
+            } catch {
+                // keep what they typed
+            }
+        }
+        return out;
+    }
+
     async function submit(e: React.FormEvent) {
         e.preventDefault();
         if (!d.first.trim()) return;
+        setLocating(true);
+        let places: { hometown?: Place; location?: Place };
+        try {
+            places = await completePlaces();
+        } finally {
+            setLocating(false);
+        }
         const next: Member = {
             ...d,
             first: d.first.trim(),
@@ -299,8 +326,8 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
             website: normalizeUrl(d.website),
             x: normalizeUrl(d.x),
             avatar: normalizeUrl(d.avatar),
-            hometown: cleanPlace(d.hometown),
-            location: cleanPlace(d.location),
+            hometown: places.hometown,
+            location: places.location,
             projects: cleanVentures(d.projects),
             company: cleanCompany(d.company),
             majors: d.majors.map((s) => s.trim()).filter(Boolean),
@@ -448,8 +475,8 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
             </Section>
 
             <div className='sticky bottom-0 -mx-6 sm:-mx-8 px-6 sm:px-8 py-4 bg-[var(--paper)] border-t crew-rule flex items-center gap-3 mt-2'>
-                <button type='submit' className='crew-btn' disabled={busy || !d.first.trim()}>
-                    {busy ? 'Saving…' : isNew ? 'Add to manifest' : 'Save'}
+                <button type='submit' className='crew-btn' disabled={busy || locating || !d.first.trim()}>
+                    {locating ? 'Pinning places…' : busy ? 'Saving…' : isNew ? 'Add to manifest' : 'Save'}
                 </button>
                 <button type='button' onClick={onCancel} className='crew-btn crew-btn-ghost'>
                     Cancel
@@ -594,7 +621,7 @@ function PlaceField({ label, value, onChange, placeholder }: { label: string; va
         try {
             const hit = await geocode(value.name);
             if (hit) {
-                onChange({ name: value.name, lat: hit.lat, lng: hit.lng });
+                onChange({ name: value.name.includes(',') ? value.name : hit.name, lat: hit.lat, lng: hit.lng });
                 setState('found');
             } else setState('missed');
         } catch {
@@ -627,9 +654,9 @@ function PlaceField({ label, value, onChange, placeholder }: { label: string; va
             </div>
             <span className='text-xs crew-muted min-h-[1rem]'>
                 {state === 'missed' && 'Could not find that. Try "City, Country".'}
-                {state === 'found' && 'Pinned.'}
+                {state === 'found' && `Pinned as ${value?.name ?? ''}.`}
                 {state === 'idle' && pinned && `Pinned at ${value!.lat!.toFixed(2)}, ${value!.lng!.toFixed(2)}`}
-                {state === 'idle' && !pinned && value?.name && 'Not on the chart until you pin it.'}
+                {state === 'idle' && !pinned && value?.name && 'Pinned automatically when you save.'}
             </span>
         </div>
     );
