@@ -50,7 +50,8 @@ export async function geocode(query: string): Promise<Geocoded | null> {
     const q = query.trim();
     if (!q) return null;
     const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&accept-language=en&q=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    // Nominatim refuses anonymous clients. Browsers ignore this header (they send their own).
+    const res = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'armada-crew/1.0 (https://armada.build)' } });
     if (!res.ok) return null;
     const rows = (await res.json()) as NominatimRow[];
     if (!rows.length) return null;
