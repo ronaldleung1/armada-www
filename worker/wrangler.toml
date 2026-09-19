@@ -1,5 +1,7 @@
 name = "armada-crew"
 main = "src/index.ts"
+# The FREE account. Pinned so a deploy can never land on a paid account by accident.
+account_id = "6d8f85d272e4781b6838b533ee7f9ff5"
 compatibility_date = "2025-09-01"
 
 # Storage: one Durable Object (free plan, SQLite-backed). Holds the encrypted
