@@ -13,6 +13,8 @@
 //                                            # list the worker's kept versions (newest first)
 //   node scripts/crew-vault.mjs restore --api https://... --pass "..." --sha <version>
 //                                            # re-publish an old version (the replaced one is kept too)
+//   node scripts/crew-vault.mjs forget --api https://... --pass "..." (--sha a,b,c | --since <version> | --all)
+//                                            # permanently drop archived versions (--since: that version and everything newer)
 //
 // `encrypt` keeps the existing data key when the vault already exists and a
 // --pass opens it, so browsers that are unlocked stay unlocked. Pass --rekey to
@@ -165,6 +167,30 @@ async function main() {
             console.log(`restored ${args.sha}; now at version ${body.sha}`);
             break;
         }
+        case 'forget': {
+            const api = requireApi();
+            const token = args.admin ?? (await gateToken(requirePass()));
+            let body;
+            if (args.all === true) body = { all: true };
+            else if (args.sha) body = { shas: String(args.sha).split(',').map((s) => s.trim()).filter(Boolean) };
+            else if (args.since) {
+                const res = await fetch(`${api}/vault/history`, { headers: { Authorization: `Bearer ${token}` } });
+                if (!res.ok) fail(`worker returned ${res.status}`);
+                const { versions } = await res.json(); // newest first
+                const i = versions.findIndex((v) => v.sha === args.since);
+                if (i === -1) fail(`version ${args.since} is not in the history`);
+                body = { shas: versions.slice(0, i + 1).map((v) => v.sha) };
+            } else fail('pass --sha a,b,c, --since <version>, or --all');
+            const res = await fetch(`${api}/vault/forget`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            const out = await res.json().catch(() => ({}));
+            if (!res.ok) fail(`forget failed (${res.status}): ${out.error ?? ''}`);
+            console.log(`forgot ${out.removed} archived version${out.removed === 1 ? '' : 's'}`);
+            break;
+        }
         case 'stage': {
             try {
                 await copyFile(ENC_DEFAULT, STAGED);
@@ -175,7 +201,7 @@ async function main() {
             break;
         }
         default:
-            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore> [--pass ...]');
+            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore|forget> [--pass ...]');
     }
 }
 

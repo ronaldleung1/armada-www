@@ -15,6 +15,7 @@
  *                                                            409 { error: "conflict", sha, vault } on a stale sha
  *   GET  /vault/history    -> { current, versions: [{ sha, at, message, bytes }] }
  *   POST /vault/restore    <- { sha }                        -> { sha }   (re-publishes an old version)
+ *   POST /vault/forget     <- { shas: [...] } | { all: true } -> { removed } (drops archived versions for good)
  *   GET  /                 -> { ok: true }                   (unauthenticated health check)
  *
  * Guard rails:
@@ -108,6 +109,17 @@ export default {
                 return json({ current: current?.sha ?? null, versions }, 200, headers);
             }
 
+            if (url.pathname === '/vault/forget' && request.method === 'POST') {
+                if (!limiter.hit(`write:${ip}`, LIMITS.perIpWrite)) return tooMany(headers);
+                const body = await readJson(request);
+                if ('error' in body) return json({ error: body.error }, body.status, headers);
+                const { shas, all } = body.value as { shas?: unknown; all?: unknown };
+                const list = Array.isArray(shas) ? shas.filter((x): x is string => typeof x === 'string') : [];
+                if (!list.length && all !== true) return json({ error: 'pass shas or all: true' }, 400, headers);
+                const result = await store.forget(all === true ? 'all' : list);
+                return json(result, 200, headers);
+            }
+
             if ((url.pathname === '/vault' && request.method === 'PUT') || (url.pathname === '/vault/restore' && request.method === 'POST')) {
                 if (!limiter.hit(`write:${ip}`, LIMITS.perIpWrite) || !limiter.hit('write:*', LIMITS.globalWrite)) return tooMany(headers);
                 const body = await readJson(request);
@@ -169,6 +181,21 @@ export class VaultStore {
             return Response.json({ sha: next.sha });
         }
 
+        if (path === '/forget') {
+            const { shas } = (await request.json()) as { shas: string[] | 'all' };
+            const index = (await s.get<Version[]>('index')) ?? [];
+            const drop = shas === 'all' ? new Set(index.map((v) => v.sha)) : new Set(shas);
+            let removed = 0;
+            for (const v of index) {
+                if (drop.has(v.sha)) {
+                    await s.delete(`hist:${v.sha}`);
+                    removed++;
+                }
+            }
+            await s.put('index', index.filter((v) => !drop.has(v.sha)));
+            return Response.json({ removed });
+        }
+
         if (path === '/restore') {
             const { sha } = (await request.json()) as { sha: string };
             const old = await s.get<Current>(`hist:${sha}`);
@@ -209,6 +236,7 @@ interface Store {
     put(vault: Vault, expectedSha: string | null, message: string): Promise<PutResult>;
     history(): Promise<Version[]>;
     restore(sha: string): Promise<{ ok: true; sha: string } | { ok: false; detail: string }>;
+    forget(shas: string[] | 'all'): Promise<{ removed: number }>;
 }
 
 function storeFor(env: Env): Store | null {
@@ -238,6 +266,9 @@ function durableStore(ns: DurableObjectNamespace): Store {
             const res = await call('/restore', { sha });
             if (!res.ok) return { ok: false, detail: 'unknown version' };
             return { ok: true, sha: ((await res.json()) as { sha: string }).sha };
+        },
+        async forget(shas) {
+            return (await (await call('/forget', { shas })).json()) as { removed: number };
         },
     };
 }
@@ -282,6 +313,9 @@ function githubStore(env: Env): Store {
         },
         async restore() {
             return { ok: false, detail: 'restore with git when using the GitHub store' };
+        },
+        async forget() {
+            return { removed: 0 }; // rewrite git history instead
         },
     };
 }
