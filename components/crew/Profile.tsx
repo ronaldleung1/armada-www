@@ -415,7 +415,7 @@ function Editor({ member, isNew, busy, onCancel, onSave, onRemove }: Props) {
                         rows={3}
                         value={d.bio ?? ''}
                         onChange={(e) => set('bio', e.target.value)}
-                        placeholder='One or two lines. What should people ping you about?'
+                        placeholder='One or two lines. What should people know about you?'
                     />
                 </Field>
             </Section>
