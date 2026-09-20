@@ -123,7 +123,7 @@ const COUNTRY_ALIASES: Record<string, string> = {
     'czech republic': 'Czechia', czechia: 'Czechia',
     prc: 'China', "people's republic of china": 'China', 'mainland china': 'China',
     hk: 'Hong Kong', 'hong kong sar': 'Hong Kong', 'hong kong, china': 'Hong Kong',
-    korea: 'South Korea', 'republic of korea': 'South Korea', 'korea, south': 'South Korea',
+    korea: 'South Korea', 'republic of korea': 'South Korea', 'korea, south': 'South Korea', rok: 'South Korea', 's. korea': 'South Korea',
     uae: 'United Arab Emirates', holland: 'Netherlands', 'the netherlands': 'Netherlands', deutschland: 'Germany',
     roc: 'Taiwan', 'taiwan (roc)': 'Taiwan', 'republic of china': 'Taiwan',
     ksa: 'Saudi Arabia', 'kingdom of saudi arabia': 'Saudi Arabia',
