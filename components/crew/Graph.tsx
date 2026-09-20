@@ -213,7 +213,7 @@ export default function Graph({ hits, searching }: { hits: Hit[]; searching: boo
     return (
         <section className='flex flex-col gap-3'>
             <div className='flex flex-wrap items-center justify-between gap-x-6 gap-y-1 border-b crew-rule'>
-                <div className='flex gap-5 overflow-x-auto text-sm' role='tablist' aria-label='Graph lens'>
+                <div className='flex gap-5 overflow-x-auto crew-noscroll text-sm' role='tablist' aria-label='Graph lens'>
                     {LENSES.map((L) => (
                         <button key={L.id} role='tab' aria-selected={lens === L.id} className='crew-tab' onClick={() => setLens(L.id)}>
                             {L.label}

@@ -187,6 +187,10 @@ select.crew-input { appearance: none; cursor: pointer; }
 
 .crew-scrim { background: rgba(251, 251, 251, 0.7); backdrop-filter: blur(2px); }
 
+/* Scrollable without a visible bar (tab rows). */
+.crew-noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+.crew-noscroll::-webkit-scrollbar { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .crew-rise, .crew-drawer, .crew-arc, .crew-shake { animation: none; }
 }
