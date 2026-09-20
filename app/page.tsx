@@ -268,6 +268,24 @@ export default function Home() {
                             >
                                 GCal Wrapped
                             </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://www.virre.ai'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Virre
+                            </a>
+                            ,{' '}
+                            <a
+                                className='underline underline-offset-4'
+                                href='https://getzybit.com'
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                Zybit
+                            </a>
                             , and many others.
                         </p>
                     </div>
