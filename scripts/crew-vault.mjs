@@ -15,6 +15,9 @@
 //                                            # re-publish an old version (the replaced one is kept too)
 //   node scripts/crew-vault.mjs forget --api https://... --pass "..." (--sha a,b,c | --since <version> | --all)
 //                                            # permanently drop archived versions (--since: that version and everything newer)
+//   node scripts/crew-vault.mjs wipe --api https://... --pass "..." --id <member-id>
+//                                            # remove a member, their log lines and every archived version that held them;
+//                                            # leaves a hashed tombstone so stale browsers cannot bring them back
 //
 // `encrypt` keeps the existing data key when the vault already exists and a
 // --pass opens it, so browsers that are unlocked stay unlocked. Pass --rekey to
@@ -31,6 +34,19 @@ import {
     unlock,
     wrapDataKey,
 } from '../lib/crew/vault.mjs';
+
+/** Mirror of tombstone() in lib/crew/util.ts (kept in plain JS so this script needs no build step). */
+function tombstone(id) {
+    let h = 0x811c9dc5;
+    for (let round = 0; round < 2; round++) {
+        for (let i = 0; i < id.length; i++) {
+            h ^= id.charCodeAt(i);
+            h = Math.imul(h, 0x01000193) >>> 0;
+        }
+        h ^= 0x5bd1e995;
+    }
+    return 't' + h.toString(16).padStart(8, '0');
+}
 
 const [, , cmd, ...rest] = process.argv;
 
@@ -191,6 +207,46 @@ async function main() {
             console.log(`forgot ${out.removed} archived version${out.removed === 1 ? '' : 's'}`);
             break;
         }
+        case 'wipe': {
+            const api = requireApi();
+            if (!args.id) fail('pass --id <member-id>');
+            const pass = requirePass();
+            const token = args.admin ?? (await gateToken(pass));
+            const current = await apiGet(api, token);
+            if (!current) fail('the worker holds no vault');
+            const key = await unlock(current.vault, pass);
+            if (!key) fail('that passphrase does not open this vault');
+            const payload = await open(key, current.vault);
+            const id = String(args.id);
+            const mark = tombstone(id);
+            const hadMember = payload.members.some((m) => m.id === id);
+            payload.members = payload.members.filter((m) => m.id !== id);
+            const logBefore = payload.log.length;
+            payload.log = payload.log.filter((e) => e.memberId !== id);
+            payload.forgotten = Array.from(new Set([...(payload.forgotten ?? []), mark])).sort();
+            payload.updatedAt = new Date().toISOString();
+            const sealed = await reseal(current.vault, key, payload);
+            const put = await fetch(`${api}/vault`, {
+                method: 'PUT',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sha: current.sha, vault: sealed, message: 'crew-vault wipe' }),
+            });
+            if (!put.ok) fail(`wipe failed (${put.status})`);
+            // Every archived version that predates this wipe may still hold them; drop the ones since they appeared.
+            const hist = await (await fetch(`${api}/vault/history`, { headers: { Authorization: `Bearer ${token}` } })).json();
+            const shas = [];
+            for (const v of hist.versions) {
+                shas.push(v.sha);
+                if (/\badded\b/i.test(v.message) && v.message.toLowerCase().includes(id.split('-')[0])) break;
+            }
+            let removed = 0;
+            if (shas.length) {
+                const res = await fetch(`${api}/vault/forget`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ shas }) });
+                removed = (await res.json()).removed ?? 0;
+            }
+            console.log(`wiped ${id}: member ${hadMember ? 'removed' : 'was already gone'}, ${logBefore - payload.log.length} log lines dropped, ${removed} archived versions forgotten, tombstone ${mark}`);
+            break;
+        }
         case 'stage': {
             try {
                 await copyFile(ENC_DEFAULT, STAGED);
@@ -201,7 +257,7 @@ async function main() {
             break;
         }
         default:
-            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore|forget> [--pass ...]');
+            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore|forget|wipe> [--pass ...]');
     }
 }
 

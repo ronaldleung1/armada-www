@@ -1,6 +1,6 @@
 import { STATIC_VAULT_URL, STORAGE, resolveApiUrl } from './config';
 import type { LogEntry, Member, Payload, SyncSource, VaultFile } from './types';
-import { clone, deepEqual } from './util';
+import { clone, deepEqual, tombstone } from './util';
 import {
     exportDataKey,
     gateToken,
@@ -248,8 +248,8 @@ export function normalizePayload(p: Payload): Payload {
     const forgotten = Array.from(new Set(p.forgotten ?? [])).sort();
     const gone = new Set(forgotten);
     const out: Payload = {
-        members: (p.members ?? []).filter((m) => !gone.has(m.id)).map(normalizeMember),
-        log: (p.log ?? []).filter((e) => !gone.has(e.memberId)).slice(0, 300),
+        members: (p.members ?? []).filter((m) => !gone.has(tombstone(m.id))).map(normalizeMember),
+        log: (p.log ?? []).filter((e) => !gone.has(tombstone(e.memberId))).slice(0, 300),
         updatedAt: p.updatedAt ?? new Date().toISOString(),
     };
     if (forgotten.length) out.forgotten = forgotten;

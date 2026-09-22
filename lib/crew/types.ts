@@ -96,8 +96,10 @@ export type Payload = {
     log: LogEntry[];
     updatedAt: string;
     /**
-     * Member ids that were deliberately wiped. Merges drop any member or log
-     * entry with these ids, so a stale browser can't resurrect them.
+     * Hashes (see tombstone() in util.ts) of member ids that were deliberately
+     * wiped. Merges drop any member or log entry whose id hashes to one of
+     * these, so a stale browser can't resurrect them, and the payload never
+     * spells out who was removed.
      */
     forgotten?: string[];
 };

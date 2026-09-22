@@ -277,3 +277,19 @@ export function daysUntilBirthday(b?: string, now: Date = new Date()): number | 
     if (next < today) next = new Date(today.getFullYear() + 1, p.m - 1, p.d);
     return Math.round((next.getTime() - today.getTime()) / 86_400_000);
 }
+
+/**
+ * Short, stable, one-way hash of a member id for the payload's tombstone list
+ * (FNV-1a, two rounds). Not a secret; it just keeps wiped ids unreadable.
+ */
+export function tombstone(id: string): string {
+    let h = 0x811c9dc5;
+    for (let round = 0; round < 2; round++) {
+        for (let i = 0; i < id.length; i++) {
+            h ^= id.charCodeAt(i);
+            h = Math.imul(h, 0x01000193) >>> 0;
+        }
+        h ^= 0x5bd1e995;
+    }
+    return 't' + h.toString(16).padStart(8, '0');
+}
