@@ -223,7 +223,7 @@ async function main() {
             payload.members = payload.members.filter((m) => m.id !== id);
             const logBefore = payload.log.length;
             payload.log = payload.log.filter((e) => e.memberId !== id);
-            payload.forgotten = Array.from(new Set([...(payload.forgotten ?? []), mark])).sort();
+            payload.forgotten = Array.from(new Set([...(payload.forgotten ?? []).filter((t) => t !== id), mark])).sort();
             payload.updatedAt = new Date().toISOString();
             const sealed = await reseal(current.vault, key, payload);
             const put = await fetch(`${api}/vault`, {
@@ -232,19 +232,27 @@ async function main() {
                 body: JSON.stringify({ sha: current.sha, vault: sealed, message: 'crew-vault wipe' }),
             });
             if (!put.ok) fail(`wipe failed (${put.status})`);
-            // Every archived version that predates this wipe may still hold them; drop the ones since they appeared.
+            // Archived versions from the moment they were added onward still hold them. Find that
+            // moment by its log message; if it isn't in the history, forget nothing rather than guess.
             const hist = await (await fetch(`${api}/vault/history`, { headers: { Authorization: `Bearer ${token}` } })).json();
-            const shas = [];
-            for (const v of hist.versions) {
-                shas.push(v.sha);
-                if (/\badded\b/i.test(v.message) && v.message.toLowerCase().includes(id.split('-')[0])) break;
-            }
+            const firstName = id.split('-')[0];
+            const added = hist.versions.findIndex((v) => /\badded\b/i.test(v.message) && v.message.toLowerCase().includes(firstName));
             let removed = 0;
-            if (shas.length) {
+            let note = '';
+            if (added === -1) {
+                // The version archived by this very save is the pre-wipe state; drop just that one.
+                const shas = hist.versions.slice(0, 1).map((v) => v.sha);
+                if (shas.length) {
+                    const res = await fetch(`${api}/vault/forget`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ shas }) });
+                    removed = (await res.json()).removed ?? 0;
+                }
+                note = ` (no "added ${firstName}" version in the history; older versions were left alone — use "versions" and "forget --since" if any still hold them)`;
+            } else {
+                const shas = hist.versions.slice(0, added + 1).map((v) => v.sha);
                 const res = await fetch(`${api}/vault/forget`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ shas }) });
                 removed = (await res.json()).removed ?? 0;
             }
-            console.log(`wiped ${id}: member ${hadMember ? 'removed' : 'was already gone'}, ${logBefore - payload.log.length} log lines dropped, ${removed} archived versions forgotten, tombstone ${mark}`);
+            console.log(`wiped ${id}: member ${hadMember ? 'removed' : 'was already gone'}, ${logBefore - payload.log.length} log lines dropped, ${removed} archived version${removed === 1 ? '' : 's'} forgotten, tombstone ${mark}${note}`);
             break;
         }
         case 'stage': {
