@@ -95,6 +95,11 @@ export type Payload = {
     members: Member[];
     log: LogEntry[];
     updatedAt: string;
+    /**
+     * Member ids that were deliberately wiped. Merges drop any member or log
+     * entry with these ids, so a stale browser can't resurrect them.
+     */
+    forgotten?: string[];
 };
 
 /** Encrypted file format, see lib/crew/vault.mjs. */

@@ -245,11 +245,15 @@ export class CrewStore {
 }
 
 export function normalizePayload(p: Payload): Payload {
-    return {
-        members: (p.members ?? []).map(normalizeMember),
-        log: (p.log ?? []).slice(0, 300),
+    const forgotten = Array.from(new Set(p.forgotten ?? [])).sort();
+    const gone = new Set(forgotten);
+    const out: Payload = {
+        members: (p.members ?? []).filter((m) => !gone.has(m.id)).map(normalizeMember),
+        log: (p.log ?? []).filter((e) => !gone.has(e.memberId)).slice(0, 300),
         updatedAt: p.updatedAt ?? new Date().toISOString(),
     };
+    if (forgotten.length) out.forgotten = forgotten;
+    return out;
 }
 
 function normalizeMember(raw: Member): Member {
@@ -331,5 +335,7 @@ export function mergePayload(base: Payload, mine: Payload, theirs: Payload): Pay
     }
     log.sort((x, y) => y.at.localeCompare(x.at));
 
-    return { members, log: log.slice(0, 300), updatedAt: new Date().toISOString() };
+    // Tombstones from either side win over everything above.
+    const forgotten = Array.from(new Set([...(base.forgotten ?? []), ...(mine.forgotten ?? []), ...(theirs.forgotten ?? [])])).sort();
+    return normalizePayload({ members, log, updatedAt: new Date().toISOString(), forgotten });
 }
