@@ -16,11 +16,17 @@
  *   GET  /vault/history    -> { current, versions: [{ sha, at, message, bytes }] }
  *   POST /vault/restore    <- { sha }                        -> { sha }   (re-publishes an old version)
  *   POST /vault/forget     <- { shas: [...] } | { all: true } -> { removed } (drops archived versions for good)
+ *   GET  /vault/abuse      -> [{ at, ip, where, attempts, lock, minutes }]  recent lockouts, newest first
+ *   POST /vault/unlock-ip  <- { ip }                         -> { cleared } lifts a lockout early
  *   GET  /                 -> { ok: true }                   (unauthenticated health check)
  *
  * Guard rails:
  *   - body size checked from Content-Length before reading, and again after
- *   - per-IP and global rate limits, with a separate tighter limit on failed auth
+ *   - passphrase guessing is throttled by the Durable Object (one instance
+ *     worldwide, so the count is real): 5 wrong tokens in 10 minutes locks the
+ *     IP for 15 minutes, doubling per repeat up to a day; more than 40 wrong
+ *     tokens an hour from anywhere pauses unlocks for IPs that never unlocked
+ *     before, so rotating addresses does not help either
  *   - the wrapped keys of the stored vault are immutable through the API unless
  *     the request carries CREW_ADMIN_TOKEN, so a leaked passphrase cannot re-key
  *     the vault and lock everyone out
@@ -67,13 +73,36 @@ const MAX_KEYHOLES = 8;
 const MAX_MESSAGE = 120;
 const MAX_HISTORY = 60;
 
-/** Best-effort limits per Cloudflare location. Cheap insurance, not a firewall. */
+/**
+ * In-memory limits. These live per worker instance, and Cloudflare runs many
+ * short-lived instances, so they only soften bursts. The real throttle on
+ * passphrase guessing is GUARD, enforced inside the Durable Object.
+ */
 const LIMITS = {
     perIp: { limit: 60, periodMs: 60_000 },
     perIpWrite: { limit: 10, periodMs: 60_000 },
-    perIpAuthFail: { limit: 8, periodMs: 60_000 },
     globalWrite: { limit: 60, periodMs: 60_000 },
 };
+
+/** Passphrase-guessing policy, enforced by the single Durable Object instance. */
+const GUARD = {
+    windowMs: 10 * 60_000, // wrong tokens are counted over this window
+    failsPerLock: 5, // this many wrong tokens in the window locks the IP
+    firstLockMs: 15 * 60_000, // first lock; doubles with each further lock…
+    maxLockMs: 24 * 3_600_000, // …up to a day
+    lockDecayMs: 24 * 3_600_000, // a day without a lock resets the doubling
+    globalWindowMs: 3_600_000,
+    globalFails: 40, // wrong tokens per hour, worldwide, before a cooldown
+    knownIpMs: 30 * 24 * 3_600_000, // IPs that unlocked this recently ride out a cooldown
+    abuseLog: 100,
+};
+
+type IpRecord = { fails: number[]; locks: number; lockedUntil: number; lastLock: number; lastOk: number };
+type AbuseEvent = { at: string; ip: string; where?: string; attempts: number; lock: number; minutes: number };
+type Verdict = { allowed: boolean; retryAfter?: number; reason?: 'locked' | 'cooldown' };
+
+/** Per-instance memo of lockouts the Durable Object already told us about, so a hammering IP costs no storage reads. */
+const lockCache = new Map<string, number>();
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
@@ -86,19 +115,38 @@ export default {
         if (!url.pathname.startsWith('/vault')) return json({ error: 'not found' }, 404, headers);
 
         const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-        if (!(await allow(env, `ip:${ip}`, LIMITS.perIp))) return tooMany(headers);
-        if (!limiter.check(`authfail:${ip}`, LIMITS.perIpAuthFail)) return tooMany(headers);
+        if (!(await allow(env, `ip:${ip}`, LIMITS.perIp))) return tooMany(headers, 60);
+        const cachedLock = lockCache.get(ip);
+        if (cachedLock && cachedLock > Date.now()) return tooMany(headers, Math.ceil((cachedLock - Date.now()) / 1000), 'locked');
 
         const auth = authorize(request, env);
-        if (!auth.ok) {
-            limiter.hit(`authfail:${ip}`);
-            return json({ error: 'unauthorized' }, 401, headers);
-        }
 
         const store = storeFor(env);
         if (!store) return json({ error: 'no storage bound' }, 500, headers);
 
         try {
+            const verdict = await store.guard(ip, !auth.ok, whereFrom(request));
+            if (!verdict.allowed) {
+                const retry = verdict.retryAfter ?? 60;
+                if (verdict.reason === 'locked') lockCache.set(ip, Date.now() + retry * 1000);
+                if (lockCache.size > 5000) lockCache.clear();
+                return tooMany(headers, retry, verdict.reason);
+            }
+            if (!auth.ok) return json({ error: 'unauthorized' }, 401, headers);
+
+            if (url.pathname === '/vault/abuse' && request.method === 'GET') {
+                return json(await store.abuse(), 200, headers);
+            }
+
+            if (url.pathname === '/vault/unlock-ip' && request.method === 'POST') {
+                const body = await readJson(request);
+                if ('error' in body) return json({ error: body.error }, body.status, headers);
+                const target = (body.value as { ip?: unknown }).ip;
+                if (typeof target !== 'string' || !target) return json({ error: 'ip required' }, 400, headers);
+                lockCache.delete(target);
+                return json(await store.unlockIp(target), 200, headers);
+            }
+
             if (url.pathname === '/vault' && request.method === 'GET') {
                 const current = await store.get();
                 return current ? json({ sha: current.sha, vault: current.vault }, 200, headers) : json({ error: 'empty' }, 404, headers);
@@ -110,7 +158,7 @@ export default {
             }
 
             if (url.pathname === '/vault/forget' && request.method === 'POST') {
-                if (!limiter.hit(`write:${ip}`, LIMITS.perIpWrite)) return tooMany(headers);
+                if (!limiter.hit(`write:${ip}`, LIMITS.perIpWrite)) return tooMany(headers, 60);
                 const body = await readJson(request);
                 if ('error' in body) return json({ error: body.error }, body.status, headers);
                 const { shas, all } = body.value as { shas?: unknown; all?: unknown };
@@ -121,7 +169,7 @@ export default {
             }
 
             if ((url.pathname === '/vault' && request.method === 'PUT') || (url.pathname === '/vault/restore' && request.method === 'POST')) {
-                if (!limiter.hit(`write:${ip}`, LIMITS.perIpWrite) || !limiter.hit('write:*', LIMITS.globalWrite)) return tooMany(headers);
+                if (!limiter.hit(`write:${ip}`, LIMITS.perIpWrite) || !limiter.hit('write:*', LIMITS.globalWrite)) return tooMany(headers, 60);
                 const body = await readJson(request);
                 if ('error' in body) return json({ error: body.error }, body.status, headers);
 
@@ -167,6 +215,20 @@ export class VaultStore {
     async fetch(request: Request): Promise<Response> {
         const s = this.state.storage;
         const path = new URL(request.url).pathname;
+
+        if (path === '/guard') return Response.json(await this.guard((await request.json()) as { ip: string; failed: boolean; where?: string }));
+        if (path === '/abuse') return Response.json((await s.get<AbuseEvent[]>('abuse')) ?? []);
+        if (path === '/unlock') {
+            const { ip } = (await request.json()) as { ip: string };
+            const rec = await s.get<IpRecord>(`rl:${ip}`);
+            if (rec) {
+                rec.lockedUntil = 0;
+                rec.fails = [];
+                await s.put(`rl:${ip}`, rec);
+            }
+            return Response.json({ cleared: !!rec });
+        }
+
         const current = (await s.get<Current>('current')) ?? null;
 
         if (path === '/get') return Response.json(current);
@@ -209,6 +271,58 @@ export class VaultStore {
         return new Response('not found', { status: 404 });
     }
 
+    /**
+     * Decide whether a request may proceed, and record the attempt if it carried
+     * a wrong token. Runs in the one Durable Object instance, so counts are
+     * global and exact. Writes only on failures and on the first success from an
+     * IP each hour, so legitimate traffic costs almost nothing.
+     */
+    private async guard({ ip, failed, where }: { ip: string; failed: boolean; where?: string }): Promise<Verdict> {
+        const s = this.state.storage;
+        const now = Date.now();
+        const key = `rl:${ip}`;
+        const rec = (await s.get<IpRecord>(key)) ?? { fails: [], locks: 0, lockedUntil: 0, lastLock: 0, lastOk: 0 };
+        if (rec.lockedUntil > now) return { allowed: false, reason: 'locked', retryAfter: Math.ceil((rec.lockedUntil - now) / 1000) };
+
+        const g = (await s.get<{ fails: number[] }>('rl:*')) ?? { fails: [] };
+        g.fails = g.fails.filter((t) => now - t < GUARD.globalWindowMs);
+        const cooling = g.fails.length >= GUARD.globalFails;
+        const cooldownRetry = () => Math.max(60, Math.ceil((g.fails[0] + GUARD.globalWindowMs - now) / 1000));
+
+        if (!failed) {
+            if (cooling && now - rec.lastOk > GUARD.knownIpMs) return { allowed: false, reason: 'cooldown', retryAfter: cooldownRetry() };
+            if (now - rec.lastOk > 3_600_000) {
+                rec.lastOk = now;
+                await s.put(key, rec);
+            }
+            return { allowed: true };
+        }
+
+        rec.fails = rec.fails.filter((t) => now - t < GUARD.windowMs);
+        rec.fails.push(now);
+        g.fails.push(now);
+        await s.put('rl:*', g);
+
+        if (rec.fails.length >= GUARD.failsPerLock) {
+            if (now - rec.lastLock > GUARD.lockDecayMs) rec.locks = 0;
+            rec.locks++;
+            const dur = Math.min(GUARD.firstLockMs * 2 ** (rec.locks - 1), GUARD.maxLockMs);
+            const attempts = rec.fails.length;
+            rec.lockedUntil = now + dur;
+            rec.lastLock = now;
+            rec.fails = [];
+            await s.put(key, rec);
+            const abuse = (await s.get<AbuseEvent[]>('abuse')) ?? [];
+            abuse.unshift({ at: new Date(now).toISOString(), ip, where, attempts, lock: rec.locks, minutes: Math.round(dur / 60_000) });
+            await s.put('abuse', abuse.slice(0, GUARD.abuseLog));
+            return { allowed: false, reason: 'locked', retryAfter: Math.ceil(dur / 1000) };
+        }
+
+        await s.put(key, rec);
+        if (cooling) return { allowed: false, reason: 'cooldown', retryAfter: cooldownRetry() };
+        return { allowed: true };
+    }
+
     private async archive(prev: Current | null): Promise<void> {
         if (!prev) return;
         const s = this.state.storage;
@@ -237,6 +351,9 @@ interface Store {
     history(): Promise<Version[]>;
     restore(sha: string): Promise<{ ok: true; sha: string } | { ok: false; detail: string }>;
     forget(shas: string[] | 'all'): Promise<{ removed: number }>;
+    guard(ip: string, failed: boolean, where?: string): Promise<Verdict>;
+    abuse(): Promise<AbuseEvent[]>;
+    unlockIp(ip: string): Promise<{ cleared: boolean }>;
 }
 
 function storeFor(env: Env): Store | null {
@@ -269,6 +386,15 @@ function durableStore(ns: DurableObjectNamespace): Store {
         },
         async forget(shas) {
             return (await (await call('/forget', { shas })).json()) as { removed: number };
+        },
+        async guard(ip, failed, where) {
+            return (await (await call('/guard', { ip, failed, where })).json()) as Verdict;
+        },
+        async abuse() {
+            return (await (await call('/abuse')).json()) as AbuseEvent[];
+        },
+        async unlockIp(ip) {
+            return (await (await call('/unlock', { ip })).json()) as { cleared: boolean };
         },
     };
 }
@@ -317,6 +443,15 @@ function githubStore(env: Env): Store {
         async forget() {
             return { removed: 0 }; // rewrite git history instead
         },
+        async guard() {
+            return { allowed: true }; // no shared counter without a Durable Object
+        },
+        async abuse() {
+            return [];
+        },
+        async unlockIp() {
+            return { cleared: false };
+        },
     };
 }
 
@@ -355,8 +490,15 @@ async function allow(env: Env, key: string, cfg: { limit: number; periodMs: numb
     return limiter.hit(key, cfg);
 }
 
-function tooMany(headers: Record<string, string>): Response {
-    return json({ error: 'too many requests' }, 429, { ...headers, 'Retry-After': '60' });
+function tooMany(headers: Record<string, string>, retryAfter: number, reason?: string): Response {
+    return json({ error: 'too many requests', reason: reason ?? 'burst', retryAfter }, 429, { ...headers, 'Retry-After': String(retryAfter) });
+}
+
+/** "Ithaca, US" when Cloudflare knows, for the abuse log. */
+function whereFrom(request: Request): string | undefined {
+    const cf = (request as unknown as { cf?: { city?: string; country?: string } }).cf;
+    const parts = [cf?.city, cf?.country].filter(Boolean);
+    return parts.length ? parts.join(', ') : undefined;
 }
 
 /* ------------------------------------------------------------------ auth */
@@ -420,6 +562,7 @@ function corsHeaders(origin: string, env: Env): Record<string, string> {
         'Access-Control-Allow-Origin': allow,
         'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+        'Access-Control-Expose-Headers': 'Retry-After',
         'Access-Control-Max-Age': '86400',
         Vary: 'Origin',
     };

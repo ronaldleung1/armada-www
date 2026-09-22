@@ -24,6 +24,16 @@ type Fetched = { vault: VaultFile; sha: string | null; source: SyncSource };
 
 
 export class UnauthorizedError extends Error {}
+/** The worker is throttling this network (too many wrong passphrases). */
+export class RateLimitedError extends Error {
+    retryAfter: number;
+    reason: 'locked' | 'cooldown' | 'burst';
+    constructor(retryAfter: number, reason: 'locked' | 'cooldown' | 'burst') {
+        super('rate limited');
+        this.retryAfter = retryAfter;
+        this.reason = reason;
+    }
+}
 /** The worker could not be reached; the edit was kept as a local draft. */
 export class OfflineError extends Error {}
 
@@ -82,6 +92,12 @@ export class CrewStore {
             cache: 'no-store',
         });
         if (res.status === 401) throw new UnauthorizedError('gate rejected');
+        if (res.status === 429) {
+            const body = (await res.json().catch(() => ({}))) as { reason?: string; retryAfter?: number };
+            const retry = Number(res.headers.get('Retry-After') ?? body.retryAfter ?? 60);
+            const reason = body.reason === 'cooldown' || body.reason === 'locked' ? body.reason : 'burst';
+            throw new RateLimitedError(retry, reason);
+        }
         if (res.status === 404) return null;
         if (!res.ok) throw new Error(`api ${res.status}`);
         const body = (await res.json()) as { sha: string; vault: VaultFile };
@@ -102,7 +118,7 @@ export class CrewStore {
                     throw new Error('The sync worker has no vault yet. Seed it once with: node scripts/crew-vault.mjs push --api <worker url> --pass "…"');
                 }
             } catch (e) {
-                if (e instanceof UnauthorizedError) throw e;
+                if (e instanceof UnauthorizedError || e instanceof RateLimitedError) throw e;
                 // network trouble: degrade to the static copy
             }
         }

@@ -15,6 +15,10 @@
 //                                            # re-publish an old version (the replaced one is kept too)
 //   node scripts/crew-vault.mjs forget --api https://... --pass "..." (--sha a,b,c | --since <version> | --all)
 //                                            # permanently drop archived versions (--since: that version and everything newer)
+//   node scripts/crew-vault.mjs abuse --api https://... --pass "..."
+//                                            # recent passphrase-guessing lockouts (ip, where, attempts, lock length)
+//   node scripts/crew-vault.mjs unlock-ip --api https://... --pass "..." --ip <address>
+//                                            # lift a lockout early (e.g. a member who mistyped five times)
 //   node scripts/crew-vault.mjs wipe --api https://... --pass "..." --id <member-id>
 //                                            # remove a member, their log lines and every archived version that held them;
 //                                            # leaves a hashed tombstone so stale browsers cannot bring them back
@@ -255,6 +259,32 @@ async function main() {
             console.log(`wiped ${id}: member ${hadMember ? 'removed' : 'was already gone'}, ${logBefore - payload.log.length} log lines dropped, ${removed} archived version${removed === 1 ? '' : 's'} forgotten, tombstone ${mark}${note}`);
             break;
         }
+        case 'abuse': {
+            const api = requireApi();
+            const token = args.admin ?? (await gateToken(requirePass()));
+            const res = await fetch(`${api}/vault/abuse`, { headers: { Authorization: `Bearer ${token}` } });
+            if (!res.ok) fail(`worker returned ${res.status}`);
+            const events = await res.json();
+            if (!events.length) console.log('no lockouts recorded');
+            for (const e of events) {
+                console.log(`${e.at.replace('T', ' ').slice(0, 16)}Z  ${e.ip.padEnd(39)}  ${(e.where ?? '?').padEnd(22)}  ${e.attempts} wrong → locked ${e.minutes} min (lock #${e.lock})`);
+            }
+            break;
+        }
+        case 'unlock-ip': {
+            const api = requireApi();
+            if (!args.ip) fail('pass --ip <address>');
+            const token = args.admin ?? (await gateToken(requirePass()));
+            const res = await fetch(`${api}/vault/unlock-ip`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip: String(args.ip) }),
+            });
+            const out = await res.json().catch(() => ({}));
+            if (!res.ok) fail(`unlock failed (${res.status}): ${out.error ?? ''}`);
+            console.log(out.cleared ? `unlocked ${args.ip}` : `${args.ip} had no record`);
+            break;
+        }
         case 'stage': {
             try {
                 await copyFile(ENC_DEFAULT, STAGED);
@@ -265,7 +295,7 @@ async function main() {
             break;
         }
         default:
-            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore|forget|wipe> [--pass ...]');
+            fail('usage: crew-vault.mjs <encrypt|decrypt|gate-tokens|stage|push|pull|versions|restore|forget|wipe|abuse|unlock-ip> [--pass ...]');
     }
 }
 

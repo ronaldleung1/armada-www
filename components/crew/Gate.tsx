@@ -3,13 +3,22 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import AnimatedBackButton from '@/components/AnimatedBackButton';
+import { RateLimitedError } from '@/lib/crew/store';
 
 type Props = { onTry: (pass: string) => Promise<boolean> };
 
+function waitText(e: RateLimitedError): string {
+    const min = Math.max(1, Math.round(e.retryAfter / 60));
+    const when = min >= 90 ? `about ${Math.round(min / 60)} h` : `${min} min`;
+    if (e.reason === 'cooldown') return `Someone is guessing right now, so new unlocks are paused for ${when}. Browsers that unlocked before are unaffected.`;
+    return `Too many guesses from this network. Try again in ${when}.`;
+}
+
 export default function Gate({ onTry }: Props) {
     const [value, setValue] = useState('');
-    const [state, setState] = useState<'idle' | 'checking' | 'wrong' | 'error'>('idle');
+    const [state, setState] = useState<'idle' | 'checking' | 'wrong' | 'limited' | 'error'>('idle');
     const [tries, setTries] = useState(0);
+    const [limit, setLimit] = useState<RateLimitedError | null>(null);
 
     async function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -21,8 +30,11 @@ export default function Gate({ onTry }: Props) {
                 setState('wrong');
                 setTries((t) => t + 1);
             }
-        } catch {
-            setState('error');
+        } catch (e) {
+            if (e instanceof RateLimitedError) {
+                setLimit(e);
+                setState('limited');
+            } else setState('error');
         }
     }
 
@@ -64,6 +76,7 @@ export default function Gate({ onTry }: Props) {
                     </div>
                     <p className='mt-3 text-sm min-h-[1.25rem]' style={{ color: 'var(--carnelian)' }} aria-live='polite'>
                         {state === 'wrong' && (tries >= 3 ? 'Still not it. Look for the emoji.' : 'Not it.')}
+                        {state === 'limited' && limit && waitText(limit)}
                         {state === 'error' && 'Could not reach the manifest. Check your connection and try again.'}
                     </p>
                 </div>

@@ -72,10 +72,13 @@ For local testing without a rebuild, in the browser console on
 
 ## Guard rails built in
 
-- Per-IP limits (60 requests/min, 10 writes/min), 60 writes/min globally, and
-  8 wrong passphrase attempts/min before an IP is told to wait. In-memory per
-  Cloudflare location; bind Cloudflare's rate-limit API (see `wrangler.toml`)
-  for a shared counter.
+- Passphrase guessing is throttled inside the Durable Object, which is a single
+  instance worldwide, so the count is exact: 5 wrong tokens in 10 minutes locks
+  the IP for 15 minutes, doubling with each repeat up to a day. More than 40
+  wrong tokens an hour from anywhere pauses unlocks for IPs that have never
+  unlocked before, so rotating addresses does not help. `crew-vault.mjs abuse`
+  lists lockouts; `unlock-ip` lifts one early. (The in-memory per-request limits
+  are only burst protection; Cloudflare runs many short-lived worker instances.)
 - Bodies over 1 MB are refused before being read.
 - The vault's wrapped keys are immutable through the API without
   `CREW_ADMIN_TOKEN`, so a leaked passphrase cannot lock everyone out. And if someone with the passphrase vandalizes the
